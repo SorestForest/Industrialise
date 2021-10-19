@@ -1,0 +1,12 @@
+{
+  "parent": "block/cube",
+  "textures": {
+    "up": "industrialise:blocks/battery_block",
+    "down": "industrialise:blocks/netherite_case",
+    "south":"industrialise:blocks/netherite_case",
+    "west": "industrialise:blocks/netherite_case",
+    "north": "industrialise:blocks/netherite_case",
+    "east": "industrialise:blocks/netherite_case",
+    "particle": "industrialise:blocks/netherite_case"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [{"item": "industrialise:inferium_dust"},{"item": "industrialise:diamond_dust"},{"item": "industrialise:lapis_dust"},
+    {"item": "minecraft:redstone"}
+  ],
+  "result": {
+    "item": "industrialise:uncharged_energy_dust"
+  }
+}

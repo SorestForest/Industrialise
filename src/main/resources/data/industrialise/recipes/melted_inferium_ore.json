@@ -1,0 +1,9 @@
+{
+  "type": "minecraft:smelting",
+  "ingredient": {
+    "item": "industrialise:inferium_ore"
+  },
+  "result": "industrialise:melted_inferium_ore",
+  "experience": 10,
+  "cookingtime": 3200
+}

@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "industrialise:upgrade_level_one",
+    "industrialise:upgrade_level_two",
+    "industrialise:upgrade_level_three"
+  ]
+
+}

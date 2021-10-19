@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "oco",
+    "oco",
+    "oco"
+  ],
+  "key": {
+    "o": {"item": "industrialise:obsidian_stick"},
+    "c": {"item": "industrialise:dark_clue"}
+  },
+  "result": {
+    "item": "industrialise:darkness_stick"
+  }
+}

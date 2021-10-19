@@ -1,0 +1,47 @@
+{
+  "itemGroup.Industrialise": "Industrialise",
+  "item.industrialise.broken_infinity_crystal": "Broken Infinity Crystal",
+  "item.industrialise.infinity_crystal": "Infinity Crystal",
+  "item.industrialise.fixed_infinity_crystal": "Fixed Infinity Crystal",
+  "item.industrialise.debug_tool": "Strange thing",
+
+  "item.industrialise.blue_gem": "Blue Gem",
+  "item.industrialise.red_gem": "Red Gem",
+  "item.industrialise.yellow_gem": "Yellow Gem",
+  "item.industrialise.green_gem": "Green Gem",
+  "item.industrialise.infinity_sword": "Infinity Sword",
+  "item.industrialise.infinity_axe": "Infinity Axe",
+  "item.industrialise.infinity_pickaxe": "Infinity Pickaxe",
+
+  "item.industrialise.netherite_sharpening": "Netherite Sharpening",
+  "item.industrialise.batarey_level_one": "Batarey: Level One",
+
+  "item.industrialise.darkness_stick": "Darkness Stick",
+  "item.industrialise.obsidian_stick": "Obsidian Stick",
+  "item.industrialise.obsidian_dust": "Obsidian Dust",
+  "item.industrialise.dark_powder": "Dark Powder",
+  "item.industrialise.diamond_dust": "Diamond Dust",
+  "item.industrialise.clue": "Clue",
+  "item.industrialise.dark_clue": "Dark Clue",
+  "item.industrialise.inferium_dust": "Inferium Dust",
+  "item.industrialise.energy_dust": "Energy Dust",
+  "item.industrialise.uncharged_energy_dust": "Energy Powder",
+  "item.industrialise.glass_lense": "Glass Lense",
+  "item.industrialise.lapis_dust": "Lapis Dust",
+  "item.industrialise.upgrade_level_one": "Upgrade: Level One",
+  "item.industrialise.upgrade_level_two": "Upgrade: Level Two",
+  "item.industrialise.upgrade_level_there": "Upgrade: Level Three",
+
+
+  "block.industrialise.block_test": "SorestForest's first block ever",
+  "block.industrialise.inferium_ore": "Inferium Ore",
+  "block.industrialise.melted_inferium_ore": "Melted Inferium Ore",
+  "block.industrialise.thunder_charger": "Thunder Charger",
+  "block.industrialise.energy_block": "Energy Block",
+  "block.industrialise.dust_disenergizer": "Dust Disenergizer",
+
+  "tooltip.infinity_crystal.main": "Infinity power in your hands...",
+
+
+  "screen.industrialise.thunder_charger": "Thunder Charger"
+}

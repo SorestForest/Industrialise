@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    "industrialise:battery_first",
+    "industrialise:battery_second",
+    "industrialise:battery_third"
+  ]
+
+}
