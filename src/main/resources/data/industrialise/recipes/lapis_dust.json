@@ -1,7 +1,0 @@
-{
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [{"item": "industrialise:netherite_sharpening"},{"item": "minecraft:lapis_lazuli"}],
-  "result": {
-    "item": "industrialise:lapis_dust"
-  }
-}

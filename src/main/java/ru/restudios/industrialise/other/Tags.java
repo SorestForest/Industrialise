@@ -9,6 +9,7 @@ public class Tags {
     public static class ItemTags {
 
         public static final net.minecraftforge.common.Tags.IOptionalNamedTag<Item> UPGRADES = createModTag("upgrades");
+        public static final net.minecraftforge.common.Tags.IOptionalNamedTag<Item> BATTERIES = createModTag("batteries");
 
         private static net.minecraftforge.common.Tags.IOptionalNamedTag<Item> createModTag(String name) {
             return net.minecraft.tags.ItemTags.createOptional(new ResourceLocation(Industrialise.MODID,name));
