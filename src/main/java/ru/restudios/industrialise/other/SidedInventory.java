@@ -3,46 +3,46 @@ package ru.restudios.industrialise.other;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.INBTSerializable;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.function.BiPredicate;
 
-public class SidedInventory implements ISidedInventory {
+public class SidedInventory implements ISidedInventory, INBTSerializable<CompoundNBT> {
 
     private NonNullList<ItemStack> stacks;
-    private final int size;
+    private int size;
     private final Settings[] settings;
-
     private final int[] allSlots;
-
     private final boolean insert;
     private final boolean extract;
-
-    private LazyOptional<IItemHandlerModifiable>[] capability;
-    private ArrayList<Direction> directions;
+    public Direction[] allDirections;
 
     public SidedInventory(int size, boolean defaultInsert, boolean defaultExtract, Settings... settings) {
         this.stacks = NonNullList.withSize(size,ItemStack.EMPTY);
         this.size = size;
         this.settings = settings;
-
         allSlots = REUtils.getFrom(0,size);
         insert = defaultInsert;
         extract = defaultExtract;
-        directions = new ArrayList<>();
+        ArrayList<Direction> directions = new ArrayList<>();
         for (Settings setting : settings) {
             directions.addAll(Arrays.asList(setting.getSides()));
         }
-        capability = SidedInvWrapper.create(this,directions.toArray(new Direction[]{}));
+        allDirections = directions.toArray(new Direction[]{});
     }
+
+    
+
 
     @Nullable
     public Settings fromDirection(Direction direction){
@@ -80,15 +80,23 @@ public class SidedInventory implements ISidedInventory {
 
     @Override
     public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
+
         if (p_180462_3_ == null){
+
             Settings setting = getGUISettings();
-            if (setting == null) { return insert; }
+            if (setting == null) {
+
+                return insert; }
+
             return setting.canInsert(p_180462_1_,p_180462_2_);
         }
+
         Settings settings = fromDirection(p_180462_3_);
         if (settings == null) {
+
             return insert;
         }
+
         return settings.canInsert(p_180462_1_,p_180462_2_);
     }
 
@@ -138,6 +146,7 @@ public class SidedInventory implements ISidedInventory {
     @Override
     public void setItem(int p_70299_1_, ItemStack p_70299_2_) {
         this.stacks.set(p_70299_1_, p_70299_2_);
+        setChanged();
     }
 
     @Override
@@ -147,16 +156,46 @@ public class SidedInventory implements ISidedInventory {
     public boolean stillValid(PlayerEntity p_70300_1_) { return true; }
 
     @Override
-    public void clearContent() { stacks = NonNullList.withSize(size,ItemStack.EMPTY); }
+    public void clearContent() { stacks = NonNullList.withSize(size,ItemStack.EMPTY); setChanged(); }
 
-    public LazyOptional<IItemHandlerModifiable> asHandler(Direction side){
-        int j = 0;
-        for (int i = 0; i < directions.size(); i++) {
-            if (directions.get(i) == side){
-                j = i;
+
+
+    @Override
+    public CompoundNBT serializeNBT()
+    {
+        ListNBT nbtTagList = new ListNBT();
+        for (int i = 0; i < stacks.size(); i++)
+        {
+            if (!stacks.get(i).isEmpty())
+            {
+                CompoundNBT itemTag = new CompoundNBT();
+                itemTag.putInt("Slot", i);
+                stacks.get(i).save(itemTag);
+                nbtTagList.add(itemTag);
             }
         }
-        return capability[j];
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.put("Items", nbtTagList);
+        nbt.putInt("Size", stacks.size());
+        return nbt;
+    }
+
+    @Override
+    public void deserializeNBT(CompoundNBT nbt)
+    {
+        this.size = (nbt.contains("Size", Constants.NBT.TAG_INT) ? nbt.getInt("Size") : stacks.size());
+        ListNBT tagList = nbt.getList("Items", Constants.NBT.TAG_COMPOUND);
+        for (int i = 0; i < tagList.size(); i++)
+        {
+            CompoundNBT itemTags = tagList.getCompound(i);
+            int slot = itemTags.getInt("Slot");
+
+            if (slot >= 0 && slot < stacks.size())
+            {
+                stacks.set(slot, ItemStack.of(itemTags));
+            }
+        }
+
     }
 
     public static class Settings {
@@ -179,18 +218,19 @@ public class SidedInventory implements ISidedInventory {
         }
 
 
-        public static final Direction[] GUI_ONLY = null;
+        public static final Direction[] GUI_ONLY = new Direction[]{null};
         public static final Direction[] HORIZONTAL = new Direction[]{Direction.EAST,Direction.NORTH,Direction.SOUTH,Direction.WEST};
         public static final Direction[] VERTICAL = new Direction[]{Direction.UP,Direction.DOWN};
         public static final Direction[] MAIN_INPUT = new Direction[]{Direction.UP};
         public static final Direction[] MAIN_OUTPUT = new Direction[]{Direction.DOWN};
+        public static final Direction[] ALL = REUtils.collapse(REUtils.collapse(HORIZONTAL,VERTICAL),GUI_ONLY);
 
         private boolean canExtract(){
             return canExtract;
         }
 
         private boolean isGUIParameters(){
-            return sides == null && slots[0] == -1;
+            return sides == GUI_ONLY && slots[0] == -1;
         }
 
         private boolean canInsert(int slot, ItemStack stack){
@@ -214,5 +254,18 @@ public class SidedInventory implements ISidedInventory {
         public static Settings createSide(Direction[] sides, boolean extract, boolean insert, BiPredicate<Integer,ItemStack> validator, int... slots){
             return new Settings(sides,extract,insert,validator,slots);
         }
+
+        public static Settings defaultInputSide(int slot,Item... items){
+            return createSide(MAIN_INPUT,true,true,validator(items),slot);
+        }
+
+        public static Settings defaultOutputSide(int slot){
+            return createSide(MAIN_OUTPUT,true,false,validator((Item) null),slot);
+        }
+
+        public static BiPredicate<Integer,ItemStack> validator(Item... items){
+            return (integer, stack) -> Arrays.asList(items).contains(stack.getItem());
+        }
+
     }
 }

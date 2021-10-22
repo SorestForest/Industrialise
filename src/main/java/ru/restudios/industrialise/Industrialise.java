@@ -1,12 +1,17 @@
 package ru.restudios.industrialise;
 
 import net.minecraft.block.Block;
+import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraft.item.*;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.math.BlockPos;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.extensions.IForgeContainerType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -17,9 +22,11 @@ import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ru.restudios.industrialise.block.ThunderChargerBlock;
+import ru.restudios.industrialise.containers.ThunderChargerContainer;
 import ru.restudios.industrialise.items.other.BatteryItem;
 import ru.restudios.industrialise.other.DebugTool;
 import ru.restudios.industrialise.other.ItemProperties;
+import ru.restudios.industrialise.screen.ThunderChargerScreen;
 import ru.restudios.industrialise.tileentities.ThunderChargerTile;
 
 // The value here should match an entry in the META-INF/mods.toml file
@@ -35,7 +42,7 @@ public class Industrialise {
     public static final ItemGroup GROUP = new ItemGroup("Industrialise") {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(Items.EMERALD);
+            return new ItemStack(DeferredEvents.INFINITY_CRYSTAL.get());
         }
     };
 
@@ -46,8 +53,10 @@ public class Industrialise {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
         // Register ourselves for server and other game events we are interested in
+        DeferredEvents.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
         DeferredEvents.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-
+        DeferredEvents.TILE_ENTITY.register(FMLJavaModLoadingContext.get().getModEventBus());
+        DeferredEvents.CONTAINERS.register(FMLJavaModLoadingContext.get().getModEventBus());
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -58,8 +67,10 @@ public class Industrialise {
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
-        // do something that can only be done on the client
-
+        // Registering screens
+        event.enqueueWork(() -> {
+            ScreenManager.register(DeferredEvents.THUNDER_CHARGER_CONTAINER.get(),ThunderChargerScreen::new);
+        });
     }
 
 
@@ -89,7 +100,22 @@ public class Industrialise {
         public static final RegistryObject<Item> FIXED_INFINITY_CRYSTAL = ITEMS.register("fixed_infinity_crystal",ItemProperties::getRareItem);
         public static final RegistryObject<Item> INFINITY_CRYSTAL = ITEMS.register("infinity_crystal",() -> glowing(ItemProperties.getEpic()));
 
-        public static final RegistryObject<Item> GLASS_LENSE = ITEMS.register("glass_lense",ItemProperties::getDefaultItem);
+        public static final RegistryObject<Item> GLASS_LENSE = ITEMS.register("glass_lense",() -> new Item(ItemProperties.getDefault().stacksTo(1)){
+            @Override
+            public int getMaxDamage(ItemStack stack) {
+                return 8;
+            }
+
+            @Override
+            public boolean isDamageable(ItemStack stack) {
+                return true;
+            }
+
+            @Override
+            public boolean canBeDepleted() {
+                return true;
+            }
+        });
 
         public static final RegistryObject<Item> DIAMOND_DUST = ITEMS.register("diamond_dust",ItemProperties::getDefaultItem);
         public static final RegistryObject<Item> OBSIDIAN_DUST = ITEMS.register("obsidian_dust",ItemProperties::getDefaultItem);
@@ -111,7 +137,7 @@ public class Industrialise {
         // Blocks
         public static final RegistryObject<Block> THUNDER_CHARGER = BLOCKS.register("thunder_charger", ThunderChargerBlock::new);
         public static final RegistryObject<Item> THUNDER_CHARGER_ITEM = ITEMS.register("thunder_charger",
-                ()-> new BlockItem(THUNDER_CHARGER.get(),ItemProperties.getUncommon()));
+                () -> new BlockItem(THUNDER_CHARGER.get(),ItemProperties.getUncommon()));
 
         // Tile entities
         public static final RegistryObject<TileEntityType<ThunderChargerTile>> THUNDER_CHARGER_TILE = TILE_ENTITY.register("thunder_charger_tile",
@@ -119,6 +145,14 @@ public class Industrialise {
 
 
         // Containers
+        public static final RegistryObject<ContainerType<ThunderChargerContainer>> THUNDER_CHARGER_CONTAINER = CONTAINERS.register("thunder_charger_container",
+                ()-> IForgeContainerType.create((windowId, inv, data) -> {
+                    BlockPos pos = data.readBlockPos();
+                    PlayerEntity entity = inv.player;
+                    TileEntity tileEntity = entity.level.getBlockEntity(pos);
+
+                    return new ThunderChargerContainer(windowId,tileEntity,entity);
+                }));
 
         public static Item glowing(Item.Properties properties){
             return new Item(properties){
