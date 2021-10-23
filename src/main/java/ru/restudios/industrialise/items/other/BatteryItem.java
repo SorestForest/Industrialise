@@ -5,7 +5,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
-import ru.restudios.industrialise.other.ItemProperties;
+import ru.restudios.industrialise.other.RegistryHelper;
 import ru.restudios.industrialise.other.REUtils;
 
 public class BatteryItem extends Item {
@@ -15,7 +15,7 @@ public class BatteryItem extends Item {
 
 
     public BatteryItem(int capacity) {
-        super(ItemProperties.getUncommon());
+        super(RegistryHelper.getUncommonItemProperties());
         this.capcacity = capacity;
 
     }

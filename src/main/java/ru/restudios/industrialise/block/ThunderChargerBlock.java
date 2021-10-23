@@ -25,12 +25,15 @@ import net.minecraftforge.fml.network.NetworkHooks;
 import ru.restudios.industrialise.Industrialise;
 import ru.restudios.industrialise.containers.ThunderChargerContainer;
 import ru.restudios.industrialise.other.REUtils;
+import ru.restudios.industrialise.other.multiblock.IMultiBlockFactory;
+import ru.restudios.industrialise.other.multiblock.IMultiBlockFactoryProvider;
+import ru.restudios.industrialise.other.multiblock.custom.ThunderChargerMultiBlock;
 import ru.restudios.industrialise.tileentities.ThunderChargerTile;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
-public class ThunderChargerBlock extends Block {
+public class ThunderChargerBlock extends Block implements IMultiBlockFactoryProvider<ThunderChargerMultiBlock> {
     public ThunderChargerBlock() {
         super(Block.Properties.of(Material.METAL, MaterialColor.COLOR_GRAY).strength(4,4));
     }
@@ -88,4 +91,11 @@ public class ThunderChargerBlock extends Block {
         };
     }
 
+    @Override
+    public IMultiBlockFactory<ThunderChargerMultiBlock> provide(World world) {
+        return (state, at) -> {
+            assert at != null;
+            return new ThunderChargerMultiBlock(REUtils.castOrNull(ThunderChargerTile.class,at), world, state);
+        };
+    }
 }

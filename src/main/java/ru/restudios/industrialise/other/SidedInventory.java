@@ -15,6 +15,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.function.BiPredicate;
 
 public class SidedInventory implements ISidedInventory, INBTSerializable<CompoundNBT> {
@@ -26,6 +27,8 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
     private final boolean insert;
     private final boolean extract;
     public Direction[] allDirections;
+
+    private HashMap<Integer,Integer> slotLimits;
 
     public SidedInventory(int size, boolean defaultInsert, boolean defaultExtract, Settings... settings) {
         this.stacks = NonNullList.withSize(size,ItemStack.EMPTY);
@@ -80,24 +83,29 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
 
     @Override
     public boolean canPlaceItemThroughFace(int p_180462_1_, ItemStack p_180462_2_, @Nullable Direction p_180462_3_) {
-
         if (p_180462_3_ == null){
-
             Settings setting = getGUISettings();
             if (setting == null) {
-
                 return insert; }
+            if (setting.canInsert(p_180462_1_,p_180462_2_)){
+                int inStack = p_180462_2_.getCount();
+                int inSlot = getItem(p_180462_1_).getCount();
+                return slotLimits.getOrDefault(p_180462_1_, p_180462_2_.getMaxStackSize()) >= (inSlot + inStack);
+            }
 
-            return setting.canInsert(p_180462_1_,p_180462_2_);
+            return false;
         }
-
         Settings settings = fromDirection(p_180462_3_);
         if (settings == null) {
-
             return insert;
         }
+        if (settings.canInsert(p_180462_1_,p_180462_2_)){
+            int inStack = p_180462_2_.getCount();
+            int inSlot = getItem(p_180462_1_).getCount();
+            return slotLimits.getOrDefault(p_180462_1_, p_180462_2_.getMaxStackSize()) >= (inSlot + inStack);
+        }
 
-        return settings.canInsert(p_180462_1_,p_180462_2_);
+        return false;
     }
 
     @Override
@@ -158,6 +166,14 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
     @Override
     public void clearContent() { stacks = NonNullList.withSize(size,ItemStack.EMPTY); setChanged(); }
 
+
+    public SidedInventory setSlotLimit(int slot,int stackLimit){
+        if (slotLimits == null) {
+            slotLimits = new HashMap<>();
+        }
+        slotLimits.put(slot,stackLimit);
+        return this;
+    }
 
 
     @Override

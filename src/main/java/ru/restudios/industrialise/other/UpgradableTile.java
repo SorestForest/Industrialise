@@ -63,7 +63,8 @@ public abstract class UpgradableTile extends TileEntity {
     public final void upgradeTick(){
         ItemStack in = itemInUpgrade();
         if (previousStack == null) { previousStack = in; }
-        if (ItemStack.isSame(in,previousStack) && !firstTick) { return; }
+        if (REUtils.consideredTheSameItem(in,previousStack) && !firstTick) { return; }
+        firstTick = false;
         previousStack = in;
         revertUpdates();
         if (!in.getItem().is(Tags.ItemTags.UPGRADES)) { return; }

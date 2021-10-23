@@ -64,17 +64,17 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
             public void setChanged() {
                 ThunderChargerTile.this.setChanged();
             }
-        };
+        }.setSlotLimit(2,1);
     }
 
     @Override
-    public void applyFirstLevel() { needToCraft = 10; }
+    public void applyFirstLevel() {  }
 
     @Override
-    public void applySecondLevel() { needToCraft = 8;}
+    public void applySecondLevel() { needToCraft = 10;}
 
     @Override
-    public void applyThirdLevel() { autoCraft = true;}
+    public void applyThirdLevel() { needToCraft = 8; upgrade = true; }
 
 
     @Override
@@ -95,7 +95,7 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
         assert level != null;
         if (!level.isClientSide()){
             upgradeTick();
-
+            autoCraft = upgrade && structure;
             timeout = REUtils.keepInRange(timeout-1,0,20);
             if (canCraft() && autoCraft){
                 EntityType.LIGHTNING_BOLT.spawn(((ServerWorld) level), null, null,
@@ -109,15 +109,31 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
 
 
     public void startCraft(){
-        if (!canCraft()) { return; }
         damageLense();
         removePowder();
         addPowder();
     }
 
+
+    private boolean structure;
+    private boolean upgrade;
+
+    public void structureBuild(){
+        structure = true;
+    }
+
+    public void structureDestroy(){
+        structure = false;
+    }
+
+
     public boolean canCraft() {
         assert level != null;
-        if (!level.isThundering()) { return false; }
+        boolean weatherCondition = level.isThundering();
+        if (autoCraft){
+            weatherCondition = true;
+        }
+        if (!weatherCondition) { return false; }
         if (timeout > 0) { return false;}
         ItemStack lenseStack = inventory.getItem(0);
         ItemStack powder = inventory.getItem(1);
