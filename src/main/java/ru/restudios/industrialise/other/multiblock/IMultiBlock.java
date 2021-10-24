@@ -2,6 +2,7 @@ package ru.restudios.industrialise.other.multiblock;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 
 import java.util.ArrayList;
 
@@ -19,6 +20,7 @@ public interface IMultiBlock {
 
     boolean canConnect(Block block);
 
+    TileEntity getTileEntity();
 
     void onStructureBuilt();
 

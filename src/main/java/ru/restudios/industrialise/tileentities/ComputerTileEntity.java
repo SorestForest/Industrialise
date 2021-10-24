@@ -9,6 +9,8 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
 import ru.restudios.industrialise.Industrialise;
 import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.SidedInventory;
@@ -16,6 +18,8 @@ import ru.restudios.industrialise.other.Tags;
 import ru.restudios.industrialise.other.multiblock.IMultiBlock;
 import ru.restudios.industrialise.other.multiblock.IMultiBlockFactoryProvider;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -106,5 +110,19 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
         }
         return null; // It can't be
     }
+
+
+    @Nonnull
+    @Override
+    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
+        if (multiBlock == null){
+            return super.getCapability(cap,side);
+        }
+        if (multiBlock.getTileEntity() == null){
+            return super.getCapability(cap, side);
+        }
+        return multiBlock.getTileEntity().getCapability(cap,side);
+    }
+
 
 }

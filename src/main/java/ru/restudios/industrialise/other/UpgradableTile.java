@@ -1,6 +1,7 @@
 package ru.restudios.industrialise.other;
 
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import ru.restudios.industrialise.Industrialise;
@@ -63,7 +64,13 @@ public abstract class UpgradableTile extends TileEntity {
     public final void upgradeTick(){
         ItemStack in = itemInUpgrade();
         if (previousStack == null) { previousStack = in; }
-        if (REUtils.consideredTheSameItem(in,previousStack) && !firstTick) { return; }
+        if (in.getItem() == Items.AIR){
+            revertUpdates();
+            return;
+        }
+        if (REUtils.consideredTheSameItem(in,previousStack) && !firstTick) {
+            return;
+        }
         firstTick = false;
         previousStack = in;
         revertUpdates();

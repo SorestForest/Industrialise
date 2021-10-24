@@ -85,7 +85,7 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
     @Override
     public void revertUpdates() {
         needToCraft = 16;
-        autoCraft = false;
+        upgrade = false;
     }
 
     private int timeout = 0;
@@ -98,6 +98,8 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
             autoCraft = upgrade && structure;
             timeout = REUtils.keepInRange(timeout-1,0,20);
             if (canCraft() && autoCraft){
+                System.out.println("Upgrade status: "+upgrade);
+                System.out.println("Upgrade stack: "+itemInUpgrade());
                 EntityType.LIGHTNING_BOLT.spawn(((ServerWorld) level), null, null,
                         worldPosition.above(), SpawnReason.TRIGGERED, true, true);
                 startCraft();

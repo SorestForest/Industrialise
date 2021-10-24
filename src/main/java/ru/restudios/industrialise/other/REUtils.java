@@ -16,7 +16,6 @@ public class REUtils {
         if (clazz.isAssignableFrom(cast.getClass())){
             return clazz.cast(cast);
         }
-
         return null;
     }
 
@@ -60,7 +59,8 @@ public class REUtils {
     }
 
     public static boolean consideredTheSameItem(ItemStack p_195929_0_, ItemStack p_195929_1_) {
-        return p_195929_0_.getItem() == p_195929_1_.getItem() && ItemStack.tagMatches(p_195929_0_, p_195929_1_);
+        if (p_195929_0_.getItem() != p_195929_1_.getItem()){ return false;}
+        return ItemStack.matches(p_195929_0_, p_195929_1_);
     }
 
 

@@ -3,6 +3,7 @@ package ru.restudios.industrialise.other.multiblock.custom;
 import com.google.common.collect.Lists;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import ru.restudios.industrialise.Industrialise;
 import ru.restudios.industrialise.other.multiblock.AbstractMultiBlock;
@@ -44,5 +45,10 @@ public class ThunderChargerMultiBlock extends AbstractMultiBlock {
     @Override
     public void onPartConnected(BlockState part) {
 
+    }
+
+    @Override
+    public TileEntity getTileEntity() {
+        return tile;
     }
 }
