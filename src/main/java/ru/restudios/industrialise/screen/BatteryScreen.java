@@ -39,7 +39,6 @@ public class BatteryScreen extends ContainerScreen<BatteryContainer> {
         double percents = stored/maxStored*100;
         double pixels = (60d/100d*percents);// 0.6
         int toPixels = (int) Math.floor(pixels);
-        System.out.println("stored: "+stored);
         this.blit(p_230450_1_,i+70,j+7,FULL_BAR_X_START,0,BAR_WIDTH,BAR_Y_END);
         this.blit(p_230450_1_,i+70,j+7,EMPTY_BAR_X_START,0,BAR_WIDTH,toPixels);
     }

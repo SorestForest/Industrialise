@@ -17,6 +17,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import ru.restudios.industrialise.Industrialise;
+import ru.restudios.industrialise.containers.BatteryContainer;
 import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.RegistryHelper;
 import ru.restudios.industrialise.tileentities.BatteryTileEntity;
@@ -57,7 +58,8 @@ public class BatteryBlock extends Block {
                         @Nullable
                         @Override
                         public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
-                            return Industrialise.DeferredEvents.BATTERY_CONTAINER.get().create(p_createMenu_1_,p_createMenu_2_);
+                            assert tile != null;
+                            return new BatteryContainer(p_createMenu_1_,p_createMenu_3_,tile,tile.getEnergy());
                         }
                     };
 

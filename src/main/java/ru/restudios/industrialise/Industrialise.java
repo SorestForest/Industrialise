@@ -200,7 +200,6 @@ public class Industrialise {
                 }));
         public static final RegistryObject<ContainerType<BatteryContainer>> BATTERY_CONTAINER = CONTAINERS.register("battery_container",
                 ()-> IForgeContainerType.create((windowId, inv, data) -> {
-                    System.out.println(data);
                     BlockPos pos = data.readBlockPos();
                     PlayerEntity player = inv.player;
                     TileEntity tile = player.level.getBlockEntity(pos);
