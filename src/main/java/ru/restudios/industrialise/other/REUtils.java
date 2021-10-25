@@ -2,9 +2,6 @@ package ru.restudios.industrialise.other;
 
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 
 import java.util.ArrayList;
 
@@ -13,6 +10,7 @@ public class REUtils {
     private REUtils() {}
 
     public static <T> T castOrNull(Class<T> clazz, Object cast){
+        if (clazz == null || cast == null){ return null; }
         if (clazz.isAssignableFrom(cast.getClass())){
             return clazz.cast(cast);
         }
@@ -61,15 +59,5 @@ public class REUtils {
     public static boolean consideredTheSameItem(ItemStack p_195929_0_, ItemStack p_195929_1_) {
         if (p_195929_0_.getItem() != p_195929_1_.getItem()){ return false;}
         return ItemStack.matches(p_195929_0_, p_195929_1_);
-    }
-
-
-
-    public static TextComponent string(Object string){
-        return new StringTextComponent(string.toString());
-    }
-
-    public static TextComponent localised(String key){
-        return new TranslationTextComponent(key);
     }
 }

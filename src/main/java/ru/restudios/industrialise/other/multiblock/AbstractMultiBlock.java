@@ -3,6 +3,7 @@ package ru.restudios.industrialise.other.multiblock;
 import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.world.World;
 import ru.restudios.industrialise.other.REUtils;
 
@@ -29,17 +30,17 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
                 blockCountsNeeded.put(part,1);
             }
         }
-        System.out.println(blockCountsNeeded+" - this structure needs");
+        System.out.println(blockCountsNeeded+" are needed to build structure ");
     }
 
     @Override
-    public void connectPart(BlockState part) {
+    public void connectPart(BlockState part, TileEntity server,TileEntity client) {
         if (canConnect(part.getBlock())){
             int placed = blockCountsPlaced.getOrDefault(part.getBlock(),0);
             placed += 1;
             blockCountsPlaced.remove(part.getBlock());
             blockCountsPlaced.put(part.getBlock(),placed);
-            onPartConnected(part);
+            onPartConnected(part,server);
             if (isBuild()){
                 onStructureBuilt();
             }

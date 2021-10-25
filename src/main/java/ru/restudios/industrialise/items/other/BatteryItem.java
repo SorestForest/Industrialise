@@ -5,8 +5,8 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.World;
-import ru.restudios.industrialise.other.RegistryHelper;
 import ru.restudios.industrialise.other.REUtils;
+import ru.restudios.industrialise.other.RegistryHelper;
 
 public class BatteryItem extends Item {
 
@@ -15,7 +15,7 @@ public class BatteryItem extends Item {
 
 
     public BatteryItem(int capacity) {
-        super(RegistryHelper.getUncommonItemProperties());
+        super(RegistryHelper.getUncommonItemProperties().durability(capacity));
         this.capcacity = capacity;
 
     }
@@ -29,10 +29,12 @@ public class BatteryItem extends Item {
     }
 
 
+
     public void setEnergy(ItemStack in, int energy){
         CompoundNBT nbt = in.getOrCreateTag();
-        nbt.putInt("Energy",energy);
+        nbt.putInt("Energy",Math.min(capcacity,energy));
         in.setTag(nbt);
+        in.setDamageValue(getCapacity()-energy);
     }
 
 
@@ -53,5 +55,24 @@ public class BatteryItem extends Item {
             return energy;
         }
         return 0;
+    }
+
+    public int getCapacity() {
+        return capcacity;
+    }
+
+    @Override
+    public boolean isDamageable(ItemStack stack) {
+        return true;
+    }
+
+    @Override
+    public boolean canBeDepleted() {
+        return true;
+    }
+
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        return capcacity;
     }
 }

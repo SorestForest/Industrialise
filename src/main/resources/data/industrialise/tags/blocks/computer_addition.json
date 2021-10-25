@@ -1,7 +1,8 @@
 {
   "replace": false,
   "values": [
-    "industrialise:thunder_charger"
+    "industrialise:thunder_charger",
+    "industrialise:disenergizer"
   ]
 
 }

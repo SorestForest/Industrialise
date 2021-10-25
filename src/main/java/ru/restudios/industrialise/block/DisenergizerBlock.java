@@ -2,10 +2,6 @@ package ru.restudios.industrialise.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -20,24 +16,23 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
 import ru.restudios.industrialise.Industrialise;
-import ru.restudios.industrialise.containers.ThunderChargerContainer;
+import ru.restudios.industrialise.containers.DisenergizerContainer;
 import ru.restudios.industrialise.other.REUtils;
+import ru.restudios.industrialise.other.RegistryHelper;
 import ru.restudios.industrialise.other.multiblock.IMultiBlockFactory;
 import ru.restudios.industrialise.other.multiblock.IMultiBlockFactoryProvider;
-import ru.restudios.industrialise.other.multiblock.custom.ThunderChargerMultiBlock;
-import ru.restudios.industrialise.tileentities.ThunderChargerTile;
+import ru.restudios.industrialise.other.multiblock.custom.DisenergizerMultiBlock;
+import ru.restudios.industrialise.tileentities.DisenergizerTile;
 
 import javax.annotation.Nullable;
-import java.util.Objects;
 
-public class ThunderChargerBlock extends Block implements IMultiBlockFactoryProvider<ThunderChargerMultiBlock> {
-    public ThunderChargerBlock() {
-        super(Block.Properties.of(Material.METAL, MaterialColor.COLOR_GRAY).strength(4,4));
+public class DisenergizerBlock extends Block implements IMultiBlockFactoryProvider<DisenergizerMultiBlock> {
+
+    public DisenergizerBlock() {
+        super(RegistryHelper.getMetalBlockProperties());
     }
-
 
     @Override
     public boolean hasTileEntity(BlockState state) {
@@ -47,29 +42,31 @@ public class ThunderChargerBlock extends Block implements IMultiBlockFactoryProv
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return Industrialise.DeferredEvents.THUNDER_CHARGER_TILE.get().create();
+        return Industrialise.DeferredEvents.DISENERGIZER_TILE.get().create();
+    }
+
+    @Override
+    public IMultiBlockFactory<DisenergizerMultiBlock> provide(World world) {
+        return (state, at, computer) -> {
+            DisenergizerTile tile = REUtils.castOrNull(DisenergizerTile.class,at);
+            assert tile != null;
+            tile.computer = computer;
+            return new DisenergizerMultiBlock(state,world,tile);
+        };
     }
 
     @Override
     public ActionResultType use(BlockState state, World worldIn, BlockPos pos,
-                                             PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
+                                PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if(!worldIn.isClientSide) {
             TileEntity tileEntity = worldIn.getBlockEntity(pos);
             if(!player.isCrouching()) {
-                if(tileEntity instanceof ThunderChargerTile) {
+                if(tileEntity instanceof DisenergizerTile) {
                     INamedContainerProvider containerProvider = createContainerProvider(worldIn, pos);
 
                     NetworkHooks.openGui(((ServerPlayerEntity)player), containerProvider, tileEntity.getBlockPos());
                 } else {
                     throw new IllegalStateException("Our Container provider is missing!");
-                }
-            } else {
-                if(tileEntity instanceof ThunderChargerTile) {
-                    if(Objects.requireNonNull(REUtils.castOrNull(ThunderChargerTile.class, tileEntity)).canCraft()) {
-                        EntityType.LIGHTNING_BOLT.spawn(((ServerWorld) worldIn), null, player,
-                                pos, SpawnReason.TRIGGERED, true, true);
-                        Objects.requireNonNull(REUtils.castOrNull(ThunderChargerTile.class, tileEntity)).startCraft();
-                    }
                 }
             }
         }
@@ -80,22 +77,13 @@ public class ThunderChargerBlock extends Block implements IMultiBlockFactoryProv
         return new INamedContainerProvider() {
             @Override
             public ITextComponent getDisplayName() {
-                return new TranslationTextComponent("screen.industrialise.thunder_charger");
+                return new TranslationTextComponent("screen.industrialise.disenergizer");
             }
 
             @Override
             public Container createMenu(int i, PlayerInventory playerInventory, PlayerEntity playerEntity) {
-                return new ThunderChargerContainer(i,worldIn.getBlockEntity(pos),playerEntity);
+                return new DisenergizerContainer(i,playerEntity,REUtils.castOrNull(DisenergizerTile.class,worldIn.getBlockEntity(pos)));
             }
-        };
-    }
-
-    @Override
-    public IMultiBlockFactory<ThunderChargerMultiBlock> provide(World world) {
-        return (state, at,computer) -> {
-            assert at != null;
-            Objects.requireNonNull(REUtils.castOrNull(ThunderChargerTile.class, at)).computer = computer;
-            return new ThunderChargerMultiBlock(REUtils.castOrNull(ThunderChargerTile.class,at), world, state);
         };
     }
 }

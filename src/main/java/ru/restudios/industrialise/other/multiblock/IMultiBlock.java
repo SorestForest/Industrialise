@@ -12,7 +12,7 @@ public interface IMultiBlock {
 
     void tick();
 
-    void connectPart(BlockState part);
+    void connectPart(BlockState part,TileEntity server,TileEntity client);
 
     void disconnectPart(Block part);
 
@@ -26,7 +26,7 @@ public interface IMultiBlock {
 
     void onStructureDestroyed();
 
-    void onPartConnected(BlockState part);
+    void onPartConnected(BlockState part,TileEntity server);
 
     int blocksNeededToBuild(Block block);
 }

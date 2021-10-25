@@ -39,17 +39,23 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
     private Block lastBlock;
     private final HashMap<BlockPos,Block> connected = Maps.newHashMap();
 
+
+
+
     @Override
     public void tick() {
         assert level != null;
+        TileEntity clientTile = null;
+        TileEntity serverTile;
+
         if (!level.isClientSide){
             if (lastBlock == null || !lastBlock.is(level.getBlockState(worldPosition.above()).getBlock())){
                 Block block = level.getBlockState(worldPosition.above()).getBlock();
                 if (block.is(Tags.BlockTags.COMPUTER_ADDITION)){
                     this.multiBlock = parseBlock(level.getBlockState(worldPosition.above()),level.getBlockEntity(worldPosition.above()));
                     lastBlock = block;
-                    System.out.println("Last block wasn't valid, so block above is: "+block.getRegistryName());
                 }
+
                 else {
                     if (multiBlock != null){
                         multiBlock.onStructureDestroyed();
@@ -60,7 +66,6 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
                 if (multiBlock.isBuild()){
                     multiBlock.tick();
                 }
-
                 for (Direction d : SidedInventory.Settings.ALL){
                     if (d == Direction.UP) { continue; }
                     if (d == null) { continue; }
@@ -80,7 +85,8 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
                     Block blockIn = level.getBlockState(relative).getBlock();
                     if (blockIn == Blocks.AIR) { continue; }
                     if (multiBlock.canConnect(blockIn)){
-                        multiBlock.connectPart(level.getBlockState(relative));
+                        serverTile = level.getBlockEntity(relative);
+                        multiBlock.connectPart(level.getBlockState(relative),serverTile,clientTile);
                         connected.remove(relative);
                         connected.put(relative, blockIn);
                     }
@@ -106,7 +112,7 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
         if (block instanceof IMultiBlockFactoryProvider){
             IMultiBlockFactoryProvider<?> provider = REUtils.castOrNull(IMultiBlockFactoryProvider.class,block);
             if (provider == null) { throw new RuntimeException("Unknown exception"); }
-            return provider.provide(at.getLevel()).create(state,at);
+            return provider.provide(at.getLevel()).create(state,at,this);
         }
         return null; // It can't be
     }
@@ -122,6 +128,11 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
             return super.getCapability(cap, side);
         }
         return multiBlock.getTileEntity().getCapability(cap,side);
+    }
+
+    public boolean isStructureBuild(){
+        if (multiBlock == null){ return false; }
+        return multiBlock.isBuild();
     }
 
 

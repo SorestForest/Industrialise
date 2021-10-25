@@ -32,20 +32,19 @@ public class ThunderChargerMultiBlock extends AbstractMultiBlock {
 
     @Override
     public void onStructureBuilt() {
-        System.out.println("build");
         tile.structureBuild();
     }
 
     @Override
     public void onStructureDestroyed() {
-        System.out.println("destroy");
         tile.structureDestroy();
     }
 
     @Override
-    public void onPartConnected(BlockState part) {
+    public void onPartConnected(BlockState part, TileEntity server) {
 
     }
+
 
     @Override
     public TileEntity getTileEntity() {

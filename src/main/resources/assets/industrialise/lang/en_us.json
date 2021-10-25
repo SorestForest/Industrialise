@@ -30,10 +30,10 @@
   "item.industrialise.lapis_dust": "Lapis Dust",
   "item.industrialise.upgrade_level_one": "Upgrade: Level One",
   "item.industrialise.upgrade_level_two": "Upgrade: Level Two",
-  "item.industrialise.upgrade_level_there": "Upgrade: Level Three",
+  "item.industrialise.upgrade_level_three": "Upgrade: Level Three",
 
 
-  "block.industrialise.block_test": "SorestForest's first block ever",
+
   "block.industrialise.inferium_ore": "Inferium Ore",
   "block.industrialise.melted_inferium_ore": "Melted Inferium Ore",
   "block.industrialise.thunder_charger": "Thunder Charger",
@@ -43,5 +43,7 @@
   "tooltip.infinity_crystal.main": "Infinity power in your hands...",
 
 
-  "screen.industrialise.thunder_charger": "Thunder Charger"
+  "screen.industrialise.thunder_charger": "Thunder Charger",
+  "screen.industrialise.battery_block": "Battery",
+  "screen.industrialise.disenergizer": "Disenergizer"
 }

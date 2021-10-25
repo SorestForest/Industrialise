@@ -4,46 +4,41 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.IWorldPosCallable;
 import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import ru.restudios.industrialise.Industrialise;
-import ru.restudios.industrialise.other.REUtils;
-import ru.restudios.industrialise.tileentities.ThunderChargerTile;
+import ru.restudios.industrialise.tileentities.BatteryTileEntity;
+import ru.restudios.industrialise.tileentities.DisenergizerTile;
 
-import java.util.Objects;
+public class DisenergizerContainer extends Container {
 
-public class ThunderChargerContainer extends Container {
-
-    public final TileEntity tileEntity;
     private final IItemHandler entityInventory;
+    private final DisenergizerTile tileEntity;
 
-    public ThunderChargerContainer(int windowID, TileEntity entity,PlayerEntity player) {
-        super(Industrialise.DeferredEvents.THUNDER_CHARGER_CONTAINER.get(),windowID);
-        this.tileEntity = entity;
+
+    public DisenergizerContainer(int windowID, PlayerEntity player, DisenergizerTile batteryTile) {
+        super(Industrialise.DeferredEvents.DISENERGIZER_CONTAINER.get(),windowID);
+        tileEntity = batteryTile;
         entityInventory = new InvWrapper(player.inventory);
 
         layoutPlayerInventorySlots(8, 86);
 
         if(tileEntity != null) {
             tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                ThunderChargerTile tile = REUtils.castOrNull(ThunderChargerTile.class,tileEntity);
-                addSlot(new SlotItemHandler(h, 0, 80, 31));
-                addSlot(new SlotItemHandler(h, 1, 80, 53));
-                addSlot(new SlotItemHandler(h,2,11,53));
-                addSlot(new SlotItemHandler(h,3,131,53));
-
+                addSlot(new Slots.ItemSlot(tileEntity.inventory,0,80,6,64,
+                        Industrialise.DeferredEvents.ENERGY_BLOCK_ITEM.get(),Industrialise.DeferredEvents.ENERGY_DUST.get()));
+                addSlot(new Slots.OutputSlot(tileEntity.inventory, 1,27,53));
+                addSlot(new Slots.BatterySlot(tileEntity.inventory,2,134,53));
             });
         }
-
     }
+
 
     @Override
     public boolean stillValid(PlayerEntity p_75145_1_) {
-        return stillValid(IWorldPosCallable.create(Objects.requireNonNull(tileEntity.getLevel()),tileEntity.getBlockPos()),p_75145_1_,tileEntity.getBlockState().getBlock());
+        return ContainerUtils.stillValid(p_75145_1_,tileEntity,tileEntity.getBlockState().getBlock());
     }
 
     @SuppressWarnings("all")
@@ -63,7 +58,6 @@ public class ThunderChargerContainer extends Container {
             index = addSlotRange(handler, index, x, y, horAmount, dx);
             y += dy;
         }
-
         return index;
     }
 
@@ -91,7 +85,7 @@ public class ThunderChargerContainer extends Container {
     private static final int TE_INVENTORY_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT;
 
     // THIS YOU HAVE TO DEFINE!
-    private static final int TE_INVENTORY_SLOT_COUNT = ThunderChargerTile.SLOTS;  // must match TileEntityInventoryBasic.NUMBER_OF_SLOTS
+    private static final int TE_INVENTORY_SLOT_COUNT = BatteryTileEntity.SLOTS;  // must match TileEntityInventoryBasic.NUMBER_OF_SLOTS
 
     @Override
     public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
@@ -127,10 +121,6 @@ public class ThunderChargerContainer extends Container {
         return copyOfSourceStack;
     }
 
-    public boolean canCraft(){
-        ThunderChargerTile tile = REUtils.castOrNull(ThunderChargerTile.class,tileEntity);
-        assert tile != null;
-        return tile.canCraft();
-    }
+
 
 }

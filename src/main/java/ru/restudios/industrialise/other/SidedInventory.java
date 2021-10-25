@@ -11,11 +11,15 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.wrapper.SidedInvWrapper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.BiPredicate;
 
 public class SidedInventory implements ISidedInventory, INBTSerializable<CompoundNBT> {
@@ -30,6 +34,8 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
 
     private HashMap<Integer,Integer> slotLimits;
 
+    private LazyOptional<IItemHandlerModifiable>[] caps;
+
     public SidedInventory(int size, boolean defaultInsert, boolean defaultExtract, Settings... settings) {
         this.stacks = NonNullList.withSize(size,ItemStack.EMPTY);
         this.size = size;
@@ -42,6 +48,7 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
             directions.addAll(Arrays.asList(setting.getSides()));
         }
         allDirections = directions.toArray(new Direction[]{});
+        caps = SidedInvWrapper.create(this,allDirections);
     }
 
     
@@ -175,6 +182,10 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
         return this;
     }
 
+    public List<ItemStack> getItems(){
+        return stacks;
+    }
+
 
     @Override
     public CompoundNBT serializeNBT()
@@ -212,6 +223,16 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
             }
         }
 
+    }
+
+    public LazyOptional<?> asHandler(Direction direction){
+        int index = 0;
+        for (int i = 0; i < allDirections.length; i++) {
+            if (allDirections[i]==direction){
+                index = i;
+            }
+        }
+        return caps[index];
     }
 
     public static class Settings {
@@ -281,6 +302,10 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
 
         public static BiPredicate<Integer,ItemStack> validator(Item... items){
             return (integer, stack) -> Arrays.asList(items).contains(stack.getItem());
+        }
+
+        public static Settings secondaryInputSide(int slot,Item... items){
+            return createSide(HORIZONTAL,true,true,validator(items),slot);
         }
 
     }

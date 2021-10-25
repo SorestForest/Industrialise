@@ -17,22 +17,21 @@ import net.minecraftforge.items.CapabilityItemHandler;
 import net.minecraftforge.items.IItemHandlerModifiable;
 import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import ru.restudios.industrialise.Industrialise;
-import ru.restudios.industrialise.other.REUtils;
-import ru.restudios.industrialise.other.SidedInventory;
-import ru.restudios.industrialise.other.Tags;
-import ru.restudios.industrialise.other.UpgradableTile;
+import ru.restudios.industrialise.other.*;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-public class ThunderChargerTile extends UpgradableTile implements ITickableTileEntity {
+public class ThunderChargerTile extends UpgradableTile implements ITickableTileEntity, ICraftMachine {
 
     public static final int SLOTS = 4;
 
-    private final SidedInventory inventory = createHandler();
+    public final SidedInventory inventory = createHandler();
+
+    public ComputerTileEntity computer;
 
     private int needToCraft;
-    private boolean autoCraft;
+    public boolean autoCraft;
 
 
     public ThunderChargerTile(TileEntityType<?> p_i48289_1_) {
@@ -93,20 +92,17 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
     @Override
     public void tick() {
         assert level != null;
+        upgradeTick();
+        autoCraft = upgrade && structure;
         if (!level.isClientSide()){
-            upgradeTick();
-            autoCraft = upgrade && structure;
             timeout = REUtils.keepInRange(timeout-1,0,20);
             if (canCraft() && autoCraft){
-                System.out.println("Upgrade status: "+upgrade);
-                System.out.println("Upgrade stack: "+itemInUpgrade());
                 EntityType.LIGHTNING_BOLT.spawn(((ServerWorld) level), null, null,
                         worldPosition.above(), SpawnReason.TRIGGERED, true, true);
                 startCraft();
                 timeout = 20;
             }
         }
-
     }
 
 
@@ -117,7 +113,12 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
     }
 
 
-    private boolean structure;
+    @Override
+    public int timeoutLeft() {
+        return timeout;
+    }
+
+    public boolean structure;
     private boolean upgrade;
 
     public void structureBuild(){

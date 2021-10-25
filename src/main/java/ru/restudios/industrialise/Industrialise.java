@@ -7,10 +7,17 @@ import net.minecraft.block.material.Material;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.container.ContainerType;
-import net.minecraft.item.*;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
+import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -24,15 +31,26 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import ru.restudios.industrialise.block.BatteryBlock;
 import ru.restudios.industrialise.block.ComputerBlock;
+import ru.restudios.industrialise.block.DisenergizerBlock;
 import ru.restudios.industrialise.block.ThunderChargerBlock;
+import ru.restudios.industrialise.containers.BatteryContainer;
+import ru.restudios.industrialise.containers.DisenergizerContainer;
 import ru.restudios.industrialise.containers.ThunderChargerContainer;
 import ru.restudios.industrialise.items.other.BatteryItem;
 import ru.restudios.industrialise.other.DebugTool;
+import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.RegistryHelper;
+import ru.restudios.industrialise.screen.BatteryScreen;
+import ru.restudios.industrialise.screen.DisenergizerScreen;
 import ru.restudios.industrialise.screen.ThunderChargerScreen;
+import ru.restudios.industrialise.tileentities.BatteryTileEntity;
 import ru.restudios.industrialise.tileentities.ComputerTileEntity;
+import ru.restudios.industrialise.tileentities.DisenergizerTile;
 import ru.restudios.industrialise.tileentities.ThunderChargerTile;
+
+import java.util.Random;
 
 // The value here should match an entry in the META-INF/mods.toml file
 @Mod("industrialise")
@@ -75,6 +93,8 @@ public class Industrialise {
         // Registering screens
         event.enqueueWork(() -> {
             ScreenManager.register(DeferredEvents.THUNDER_CHARGER_CONTAINER.get(),ThunderChargerScreen::new);
+            ScreenManager.register(DeferredEvents.BATTERY_CONTAINER.get(), BatteryScreen::new);
+            ScreenManager.register(DeferredEvents.DISENERGIZER_CONTAINER.get(), DisenergizerScreen::new);
         });
     }
 
@@ -151,12 +171,23 @@ public class Industrialise {
                 () -> new Block(AbstractBlock.Properties.of(Material.STONE).sound(SoundType.STONE).strength(4)));
         public static final RegistryObject<Item> ENERGY_BLOCK_ITEM = ITEMS.register("energy_block",
                 ()-> new BlockItem(ENERGY_BLOCK.get(),RegistryHelper.getUncommonItemProperties()));
+        public static final RegistryObject<Block> NETHERITE_CASE = BLOCKS.register("netherite_case",RegistryHelper::getMetalBlock);
+        public static final RegistryObject<Item> NETHERITE_CASE_ITEM = ITEMS.register("netherite_case",() -> RegistryHelper.defaultBlockItem(NETHERITE_CASE.get()));
+        public static final RegistryObject<Block> DISENERGIZER_BLOCK = BLOCKS.register("disenergizer", DisenergizerBlock::new);
+        public static final RegistryObject<Item> DISENERGIZER_ITEM = ITEMS.register("disenergizer",
+                ()->RegistryHelper.defaultBlockItem(DISENERGIZER_BLOCK.get()));
+        public static final RegistryObject<Block> BATTERY_BLOCK = BLOCKS.register("battery_block", BatteryBlock::new);
+        public static final RegistryObject<Item> BATTERY_ITEM = ITEMS.register("battery_block",()->RegistryHelper.defaultBlockItem(BATTERY_BLOCK.get()));
 
         // Tile entities
         public static final RegistryObject<TileEntityType<ThunderChargerTile>> THUNDER_CHARGER_TILE = TILE_ENTITY.register("thunder_charger_tile",
                 ()->TileEntityType.Builder.of(ThunderChargerTile::new,THUNDER_CHARGER.get()).build(null));
         public static final RegistryObject<TileEntityType<ComputerTileEntity>> COMPUTER_TILE = TILE_ENTITY.register("computer_tile",
                 ()->TileEntityType.Builder.of(ComputerTileEntity::new,COMPUTER_BLOCK.get()).build(null));
+        public static final RegistryObject<TileEntityType<DisenergizerTile>> DISENERGIZER_TILE = TILE_ENTITY.register("disenergizer_tile",
+                ()->TileEntityType.Builder.of(DisenergizerTile::new,DISENERGIZER_BLOCK.get()).build(null));
+        public static final RegistryObject<TileEntityType<BatteryTileEntity>> BATTERY_TILE = TILE_ENTITY.register("battery_tile",
+                ()->TileEntityType.Builder.of(BatteryTileEntity::new,BATTERY_BLOCK.get()).build(null));
 
         // Containers
         public static final RegistryObject<ContainerType<ThunderChargerContainer>> THUNDER_CHARGER_CONTAINER = CONTAINERS.register("thunder_charger_container",
@@ -166,6 +197,24 @@ public class Industrialise {
                     TileEntity tileEntity = entity.level.getBlockEntity(pos);
 
                     return new ThunderChargerContainer(windowId,tileEntity,entity);
+                }));
+        public static final RegistryObject<ContainerType<BatteryContainer>> BATTERY_CONTAINER = CONTAINERS.register("battery_container",
+                ()-> IForgeContainerType.create((windowId, inv, data) -> {
+                    System.out.println(data);
+                    BlockPos pos = data.readBlockPos();
+                    PlayerEntity player = inv.player;
+                    TileEntity tile = player.level.getBlockEntity(pos);
+                    int energy = data.readInt();
+                    System.out.println("energy: "+energy);
+                    return new BatteryContainer(windowId,player, REUtils.castOrNull(BatteryTileEntity.class,tile),energy);
+                }));
+        public static final RegistryObject<ContainerType<DisenergizerContainer>> DISENERGIZER_CONTAINER = CONTAINERS.register("disenergizer_container",
+                ()-> IForgeContainerType.create((windowId, inv, data) -> {
+                    BlockPos pos = data.readBlockPos();
+                    PlayerEntity entity = inv.player;
+                    TileEntity tileEntity = entity.level.getBlockEntity(pos);
+
+                    return new DisenergizerContainer(windowId,entity,REUtils.castOrNull(DisenergizerTile.class,tileEntity));
                 }));
 
         public static Item glowing(Item.Properties properties){
@@ -177,6 +226,75 @@ public class Industrialise {
                     return true;
                 }
             };
+        }
+
+        public static Item craftingDamagable(Item.Properties properties){
+            return new Item(properties){
+
+                private final Random random = new Random();
+
+                @Override
+                public boolean hasContainerItem(ItemStack stack) {
+                    return true;
+                }
+
+                @Override
+                public ItemStack getContainerItem(ItemStack itemStack) {
+                    itemStack.hurt(1,random,null);
+                    if (itemStack.getDamageValue() == getMaxDamage(itemStack)){
+                        return ItemStack.EMPTY;
+                    }
+                    return itemStack;
+                }
+
+                @Override
+                public boolean isDamageable(ItemStack stack) {
+                    return true;
+                }
+            };
+        }
+    }
+
+    public static ResourceLocation resource(String path){
+        return new ResourceLocation(Industrialise.MODID,path);
+    }
+
+    public static ResourceLocation resource(ResourceType type,String file){
+        if (type == null){ return resource(file); }
+        String append = type.toString();
+        return resource(append+file);
+    }
+
+    public static TranslationTextComponent localise(ResourceType type,String text){
+        return new TranslationTextComponent(type.toString()+text);
+    }
+
+    public static ITextComponent string(Object o){
+        return new StringTextComponent(o.toString());
+    }
+
+
+    public enum ResourceType {
+        SCREEN("textures/gui/",false),
+        BLOCK_NAME("block.industrialise.",true),
+        ITEM("item.industrialise.",true),
+        CONTAINER("screen.industrialise.",true);
+
+        private final String name;
+        private final boolean translation;
+
+        ResourceType(String name,boolean t){
+            this.name = name;
+            translation = t;
+        }
+
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        public boolean translation() {
+            return translation;
         }
     }
 }
