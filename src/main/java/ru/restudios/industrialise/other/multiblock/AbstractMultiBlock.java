@@ -34,7 +34,7 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
     }
 
     @Override
-    public void connectPart(BlockState part, TileEntity server,TileEntity client) {
+    public void connectPart(BlockState part, TileEntity server) {
         if (canConnect(part.getBlock())){
             int placed = blockCountsPlaced.getOrDefault(part.getBlock(),0);
             placed += 1;

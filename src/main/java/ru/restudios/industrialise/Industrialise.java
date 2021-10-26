@@ -204,7 +204,6 @@ public class Industrialise {
                     PlayerEntity player = inv.player;
                     TileEntity tile = player.level.getBlockEntity(pos);
                     int energy = data.readInt();
-                    System.out.println("energy: "+energy);
                     return new BatteryContainer(windowId,player, REUtils.castOrNull(BatteryTileEntity.class,tile),energy);
                 }));
         public static final RegistryObject<ContainerType<DisenergizerContainer>> DISENERGIZER_CONTAINER = CONTAINERS.register("disenergizer_container",

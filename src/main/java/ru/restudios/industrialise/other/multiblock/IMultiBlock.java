@@ -12,7 +12,7 @@ public interface IMultiBlock {
 
     void tick();
 
-    void connectPart(BlockState part,TileEntity server,TileEntity client);
+    void connectPart(BlockState part,TileEntity server);
 
     void disconnectPart(Block part);
 

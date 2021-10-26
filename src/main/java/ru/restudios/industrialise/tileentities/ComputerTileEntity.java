@@ -39,9 +39,6 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
     private Block lastBlock;
     private final HashMap<BlockPos,Block> connected = Maps.newHashMap();
 
-
-
-
     @Override
     public void tick() {
         assert level != null;
@@ -86,7 +83,7 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
                     if (blockIn == Blocks.AIR) { continue; }
                     if (multiBlock.canConnect(blockIn)){
                         serverTile = level.getBlockEntity(relative);
-                        multiBlock.connectPart(level.getBlockState(relative),serverTile,clientTile);
+                        multiBlock.connectPart(level.getBlockState(relative),serverTile);
                         connected.remove(relative);
                         connected.put(relative, blockIn);
                     }

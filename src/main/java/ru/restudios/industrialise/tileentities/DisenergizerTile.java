@@ -71,7 +71,7 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
     @Override
     public void tick() {
         assert level != null;
-        if (!level.isClientSide && batteryServer != null){
+        if (!level.isClientSide){
             timeout = REUtils.keepInRange(timeout-1,0,20);
             if (canCraft() && timeoutLeft() == 0){
                 ItemStack energyDust = inventory.getItem(0);
@@ -83,7 +83,7 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
                     output = new ItemStack(Industrialise.DeferredEvents.ENERGY_POWDER.get(),1);
                     inventory.setItem(1,output);
                 } else { output.grow(1); }
-                if (battery.getItem() != Items.AIR && battery.getCount() >= 1 && this.batteryServer == null){
+                if (battery.getItem() != Items.AIR && battery.getCount() >= 1 && !structure){
                     int count = 1000;
                     if (energyDust.getItem() == Industrialise.DeferredEvents.ENERGY_BLOCK_ITEM.get()){
                         count = 4000;
