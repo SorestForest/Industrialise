@@ -40,6 +40,7 @@ public class DebugTool extends Item {
                         entity.sendMessage(Industrialise.string("Energy filled: "+iEnergyStorage.getEnergyStored()),UUID.randomUUID());
                 });
 
+
             }
 
         return ActionResult.success(entity.getItemInHand(p_77659_3_));

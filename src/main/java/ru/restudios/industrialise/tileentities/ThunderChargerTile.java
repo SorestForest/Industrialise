@@ -41,23 +41,23 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
     }
 
     public ThunderChargerTile(){
-        this(Industrialise.DeferredEvents.THUNDER_CHARGER_TILE.get());
+        this(Industrialise.TileEntities.THUNDER_CHARGER_TILE.get());
     }
 
     private SidedInventory createHandler(){
         return new SidedInventory(SLOTS,true,true,
                 SidedInventory.Settings.createGUI((integer, stack) -> {
                     switch (integer){
-                        case 1: return stack.getItem() == Industrialise.DeferredEvents.ENERGY_POWDER.get();
-                        case 0: return stack.getItem() == Industrialise.DeferredEvents.GLASS_LENSE.get();
+                        case 1: return stack.getItem() == Industrialise.Items.ENERGY_POWDER.get();
+                        case 0: return stack.getItem() == Industrialise.Items.GLASS_LENSE.get();
                         case 2: return stack.getItem().is(Tags.ItemTags.UPGRADES);
                         default:
                         case 3: return false;
                     }
-                }),SidedInventory.Settings.defaultInputSide(0,Industrialise.DeferredEvents.GLASS_LENSE.get()),
+                }),SidedInventory.Settings.defaultInputSide(0,Industrialise.Items.GLASS_LENSE.get()),
                 SidedInventory.Settings.defaultOutputSide(3),
                 SidedInventory.Settings.createSide(SidedInventory.Settings.HORIZONTAL,true,true,
-                        SidedInventory.Settings.validator(Industrialise.DeferredEvents.ENERGY_POWDER.get()),1)){
+                        SidedInventory.Settings.validator(Industrialise.Items.ENERGY_POWDER.get()),1)){
 
             @Override
             public void setChanged() {
@@ -155,7 +155,7 @@ public class ThunderChargerTile extends UpgradableTile implements ITickableTileE
     private void addPowder(){
         ItemStack powderStack = inventory.getItem(3);
         if (powderStack.getItem() == Items.AIR) {
-            inventory.setItem(3,new ItemStack(Industrialise.DeferredEvents.ENERGY_DUST.get(),1));
+            inventory.setItem(3,new ItemStack(Industrialise.Items.ENERGY_DUST.get(),1));
         }
         else {
             powderStack.grow(1);

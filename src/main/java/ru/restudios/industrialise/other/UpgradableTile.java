@@ -75,16 +75,16 @@ public abstract class UpgradableTile extends TileEntity {
         previousStack = in;
         revertUpdates();
         if (!in.getItem().is(Tags.ItemTags.UPGRADES)) { return; }
-        if (in.getItem() == Industrialise.DeferredEvents.UPGRADE_FIRST.get()){
+        if (in.getItem() == Industrialise.Items.UPGRADE_FIRST.get()){
             applyFirstLevel();
         }
-        else if (in.getItem() == Industrialise.DeferredEvents.UPGRADE_SECOND.get()){
+        else if (in.getItem() == Industrialise.Items.UPGRADE_SECOND.get()){
             if (include){
                 applyFirstLevel();
             }
             applySecondLevel();
         }
-        else if (in.getItem() == Industrialise.DeferredEvents.UPGRADE_THIRD.get()){
+        else if (in.getItem() == Industrialise.Items.UPGRADE_THIRD.get()){
             if (include){
                 applyFirstLevel();
                 applySecondLevel();

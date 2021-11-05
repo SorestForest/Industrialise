@@ -16,7 +16,6 @@ import java.util.ArrayList;
 public class DisenergizerMultiBlock extends AbstractMultiBlock {
 
     private final DisenergizerTile tile;
-    private BatteryTileEntity batteryTile;
 
     public DisenergizerMultiBlock(BlockState state, World world, DisenergizerTile tile) {
         super(state, world);
@@ -25,7 +24,7 @@ public class DisenergizerMultiBlock extends AbstractMultiBlock {
 
     @Override
     public ArrayList<Block> parts() {
-        return Lists.newArrayList(Industrialise.DeferredEvents.BATTERY_BLOCK.get());
+        return Lists.newArrayList(Industrialise.Blocks.BATTERY_BLOCK.get());
     }
 
     @Override
@@ -50,7 +49,6 @@ public class DisenergizerMultiBlock extends AbstractMultiBlock {
 
     @Override
     public void onPartConnected(BlockState part,TileEntity server) {
-        batteryTile = REUtils.castOrNull(BatteryTileEntity.class,server);
-        tile.batteryServer = batteryTile;
+        tile.batteryServer = REUtils.castOrNull(BatteryTileEntity.class, server);
     }
 }

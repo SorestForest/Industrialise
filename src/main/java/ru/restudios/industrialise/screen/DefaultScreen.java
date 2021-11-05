@@ -28,6 +28,7 @@ public abstract class DefaultScreen<T extends Container> extends ContainerScreen
         this.renderBackground(matrixStack);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         this.renderTooltip(matrixStack, mouseX, mouseY);
+
     }
 
     protected abstract ResourceLocation getTexture();

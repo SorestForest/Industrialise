@@ -18,7 +18,7 @@ public class BatteryContainer extends Container {
     public int energyStored;
 
     public BatteryContainer(int windowID, PlayerEntity player, BatteryTileEntity batteryTile,int energyStored) {
-        super(Industrialise.DeferredEvents.BATTERY_CONTAINER.get(),windowID);
+        super(Industrialise.Containers.BATTERY_CONTAINER.get(),windowID);
         tileEntity = batteryTile;
         entityInventory = new InvWrapper(player.inventory);
 

@@ -26,6 +26,6 @@ public class ComputerBlock extends Block {
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return Industrialise.DeferredEvents.COMPUTER_TILE.get().create();
+        return Industrialise.TileEntities.COMPUTER_TILE.get().create();
     }
 }

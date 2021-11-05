@@ -1,4 +1,4 @@
-package ru.restudios.industrialise.block;
+package ru.restudios.industrialise.block.multiblock_hardcores;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -17,15 +17,15 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 import ru.restudios.industrialise.Industrialise;
-import ru.restudios.industrialise.containers.BatteryContainer;
-import ru.restudios.industrialise.other.REUtils;
+import ru.restudios.industrialise.containers.EnergyCollectorContainer;
 import ru.restudios.industrialise.other.RegistryHelper;
-import ru.restudios.industrialise.tileentities.BatteryTileEntity;
+import ru.restudios.industrialise.tileentities.EnergyCollectorTileEntity;
 
 import javax.annotation.Nullable;
 
-public class BatteryBlock extends Block {
-    public BatteryBlock() {
+public class EnergyCollectorBlock extends Block {
+
+    public EnergyCollectorBlock() {
         super(RegistryHelper.getMetalBlockProperties());
     }
 
@@ -37,7 +37,7 @@ public class BatteryBlock extends Block {
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return Industrialise.TileEntities.BATTERY_TILE.get().create();
+        return Industrialise.TileEntities.ENERGY_COLLECTOR_TILE.get().create();
     }
 
     @Override
@@ -46,28 +46,21 @@ public class BatteryBlock extends Block {
         if(!worldIn.isClientSide) {
             TileEntity tileEntity = worldIn.getBlockEntity(pos);
             if(!player.isCrouching()) {
-                if(tileEntity instanceof BatteryTileEntity) {
-                    BatteryTileEntity tile = REUtils.castOrNull(BatteryTileEntity.class,worldIn.getBlockEntity(pos));
-                    INamedContainerProvider containerProvider =  new INamedContainerProvider() {
-
+                if(tileEntity instanceof EnergyCollectorTileEntity) {
+                    INamedContainerProvider containerProvider = new INamedContainerProvider() {
                         @Override
                         public ITextComponent getDisplayName() {
-                            return Industrialise.localise(Industrialise.ResourceType.CONTAINER,"battery_block");
+                            return Industrialise.localise(Industrialise.ResourceType.CONTAINER,"energy_collector");
                         }
 
                         @Nullable
                         @Override
                         public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
-                            assert tile != null;
-                            return new BatteryContainer(p_createMenu_1_,p_createMenu_3_,tile,tile.getEnergy());
+                            return new EnergyCollectorContainer(p_createMenu_1_, ((EnergyCollectorTileEntity) tileEntity),p_createMenu_2_);
                         }
                     };
 
-                    NetworkHooks.openGui(((ServerPlayerEntity)player), containerProvider, buffer -> {
-                        buffer.writeBlockPos(pos);
-                        assert tile != null;
-                        buffer.writeInt(tile.getEnergy());
-                    });
+                    NetworkHooks.openGui(((ServerPlayerEntity)player), containerProvider, tileEntity.getBlockPos());
                 } else {
                     throw new IllegalStateException("Our Container provider is missing!");
                 }
@@ -75,6 +68,4 @@ public class BatteryBlock extends Block {
         }
         return ActionResultType.SUCCESS;
     }
-
-
 }

@@ -1,7 +1,9 @@
 package ru.restudios.industrialise.tileentities;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
@@ -28,11 +30,11 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
 
     private SidedInventory createSided() {
         return new SidedInventory(3,true,false,
-                SidedInventory.Settings.defaultInputSide(0,Industrialise.DeferredEvents.ENERGY_DUST.get(),Industrialise.DeferredEvents.ENERGY_BLOCK_ITEM.get()),
+                SidedInventory.Settings.defaultInputSide(0,Industrialise.Items.ENERGY_DUST.get(),Industrialise.Blocks.ENERGY_BLOCK_ITEM.get()),
                 SidedInventory.Settings.defaultOutputSide(1),
                 SidedInventory.Settings.createGUI((integer, stack) -> {
                     switch (integer){
-                        case 0: return stack.getItem() == Industrialise.DeferredEvents.ENERGY_DUST.get() || stack.getItem() == Industrialise.DeferredEvents.ENERGY_BLOCK_ITEM.get();
+                        case 0: return stack.getItem() == Industrialise.Items.ENERGY_DUST.get() || stack.getItem() == Industrialise.Blocks.ENERGY_BLOCK_ITEM.get();
                         case 1: return false;
                         case 2: return stack.getItem().is(Tags.ItemTags.BATTERIES);
                     }
@@ -51,7 +53,7 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
     }
 
     public DisenergizerTile(){
-        this(Industrialise.DeferredEvents.DISENERGIZER_TILE.get());
+        this(Industrialise.TileEntities.DISENERGIZER_TILE.get());
     }
 
     private boolean structure;
@@ -80,12 +82,12 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
 
 
                 if (output.getItem() == Items.AIR || output == ItemStack.EMPTY){
-                    output = new ItemStack(Industrialise.DeferredEvents.ENERGY_POWDER.get(),1);
+                    output = new ItemStack(Industrialise.Items.ENERGY_POWDER.get(),1);
                     inventory.setItem(1,output);
                 } else { output.grow(1); }
                 if (battery.getItem() != Items.AIR && battery.getCount() >= 1 && !structure){
                     int count = 1000;
-                    if (energyDust.getItem() == Industrialise.DeferredEvents.ENERGY_BLOCK_ITEM.get()){
+                    if (energyDust.getItem() == Industrialise.Blocks.ENERGY_BLOCK_ITEM.get()){
                         count = 4000;
                     }
                     BatteryItem item = REUtils.castOrNull(BatteryItem.class,battery.getItem());
@@ -94,7 +96,7 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
                 }
                 if (this.batteryServer != null && structure){
                     int energy = 1000;
-                    if (energyDust.getItem() == Industrialise.DeferredEvents.ENERGY_BLOCK_ITEM.get()){
+                    if (energyDust.getItem() == Industrialise.Blocks.ENERGY_BLOCK_ITEM.get()){
                         energy = 4000;
                     }
                     this.batteryServer.receiveEnergy(energy,false);
@@ -128,9 +130,6 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
         return timeout;
     }
 
-
-
-
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
@@ -138,5 +137,17 @@ public class DisenergizerTile extends TileEntity implements ITickableTileEntity,
             return inventory.asHandler(side).cast();
         }
         return super.getCapability(cap, side);
+    }
+
+    @Override
+    public void load(BlockState p_230337_1_, CompoundNBT p_230337_2_) {
+        inventory.deserializeNBT(p_230337_2_.getCompound("inv"));
+        super.load(p_230337_1_, p_230337_2_);
+    }
+
+    @Override
+    public CompoundNBT save(CompoundNBT p_189515_1_) {
+        p_189515_1_.put("inv",inventory.serializeNBT());
+        return super.save(p_189515_1_);
     }
 }

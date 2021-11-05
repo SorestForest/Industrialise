@@ -129,12 +129,11 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
 
     @Override
     public boolean isEmpty() {
-        for(ItemStack itemstack : this.stacks) {
+        for (ItemStack itemstack : this.stacks) {
             if (!itemstack.isEmpty()) {
                 return false;
             }
         }
-
         return true;
     }
 
@@ -306,6 +305,10 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
 
         public static Settings secondaryInputSide(int slot,Item... items){
             return createSide(HORIZONTAL,true,true,validator(items),slot);
+        }
+
+        public static Settings acceptsOnly(Item... items){
+            return createSide(ALL,false,false,validator(items),-1);
         }
 
     }

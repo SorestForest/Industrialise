@@ -12,6 +12,7 @@ import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import ru.restudios.industrialise.Industrialise;
 import ru.restudios.industrialise.other.REUtils;
+import ru.restudios.industrialise.other.SidedInventory;
 import ru.restudios.industrialise.tileentities.ThunderChargerTile;
 
 import java.util.Objects;
@@ -22,19 +23,19 @@ public class ThunderChargerContainer extends Container {
     private final IItemHandler entityInventory;
 
     public ThunderChargerContainer(int windowID, TileEntity entity,PlayerEntity player) {
-        super(Industrialise.DeferredEvents.THUNDER_CHARGER_CONTAINER.get(),windowID);
+        super(Industrialise.Containers.THUNDER_CHARGER_CONTAINER.get(),windowID);
         this.tileEntity = entity;
         entityInventory = new InvWrapper(player.inventory);
 
         layoutPlayerInventorySlots(8, 86);
 
         if(tileEntity != null) {
-            tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                ThunderChargerTile tile = REUtils.castOrNull(ThunderChargerTile.class,tileEntity);
-                addSlot(new SlotItemHandler(h, 0, 80, 31));
-                addSlot(new SlotItemHandler(h, 1, 80, 53));
-                addSlot(new SlotItemHandler(h,2,11,53));
-                addSlot(new SlotItemHandler(h,3,131,53));
+            tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(a -> {
+                SidedInventory h = REUtils.castOrNull(ThunderChargerTile.class,tileEntity).inventory;
+                addSlot(new Slots.ThunderChargerSlot(h, 0, 80, 31,64));
+                addSlot(new Slots.ThunderChargerSlot(h, 1, 80, 53,64));
+                addSlot(new Slots.UpgradeSlot(h,2,11,53));
+                addSlot(new Slots.OutputSlot(h,3,131,53,64));
 
             });
         }

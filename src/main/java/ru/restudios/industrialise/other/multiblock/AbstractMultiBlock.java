@@ -13,6 +13,7 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
 
     private final HashMap<Block,Integer> blockCountsNeeded = Maps.newHashMap();
     private final HashMap<Block,Integer> blockCountsPlaced = Maps.newHashMap();
+    private final HashMap<Block,TileEntity> placed = new HashMap<>();
 
     protected BlockState state;
     protected World world;
@@ -41,6 +42,7 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
             blockCountsPlaced.remove(part.getBlock());
             blockCountsPlaced.put(part.getBlock(),placed);
             onPartConnected(part,server);
+            this.placed.put(part.getBlock(),server);
             if (isBuild()){
                 onStructureBuilt();
             }
@@ -55,6 +57,7 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
             i = REUtils.keepInRange(i,0,Integer.MAX_VALUE);
             blockCountsPlaced.remove(part);
             blockCountsPlaced.put(part,i);
+            placed.remove(part);
             onStructureDestroyed();
         }
     }
@@ -67,6 +70,15 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
             int needed = blocksNeededToBuild(block);
             if (needed > 0){
                 flag = false;
+                break;
+            }
+        }
+        for (TileEntity tileEntity : placed.values()){
+            if (tileEntity instanceof IMultiBlockPart){
+                if (!((IMultiBlockPart) tileEntity).isReady()){
+                    flag = false;
+                    break;
+                }
             }
         }
         return blockTypes && flag;

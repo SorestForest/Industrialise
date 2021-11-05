@@ -33,7 +33,7 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
     }
 
     public ComputerTileEntity(){
-        this(Industrialise.DeferredEvents.COMPUTER_TILE.get());
+        this(Industrialise.TileEntities.COMPUTER_TILE.get());
     }
 
     private Block lastBlock;
@@ -42,7 +42,6 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
     @Override
     public void tick() {
         assert level != null;
-        TileEntity clientTile = null;
         TileEntity serverTile;
 
         if (!level.isClientSide){

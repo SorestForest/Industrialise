@@ -47,7 +47,7 @@ public class ThunderChargerBlock extends Block implements IMultiBlockFactoryProv
     @Nullable
     @Override
     public TileEntity createTileEntity(BlockState state, IBlockReader world) {
-        return Industrialise.DeferredEvents.THUNDER_CHARGER_TILE.get().create();
+        return Industrialise.TileEntities.THUNDER_CHARGER_TILE.get().create();
     }
 
     @Override

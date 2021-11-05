@@ -22,7 +22,7 @@ public class ThunderChargerMultiBlock extends AbstractMultiBlock {
 
     @Override
     public ArrayList<Block> parts() {
-        return Lists.newArrayList(Industrialise.DeferredEvents.ENERGY_BLOCK.get(),Industrialise.DeferredEvents.ENERGY_BLOCK.get(),Industrialise.DeferredEvents.ENERGY_BLOCK.get());
+        return Lists.newArrayList(Industrialise.Blocks.ENERGY_COLLECTOR.get(),Industrialise.Blocks.ENERGY_COLLECTOR.get());
     }
 
     @Override

@@ -52,7 +52,7 @@ public class BatteryTileEntity extends TileEntity implements ITickableTileEntity
     }
 
     public BatteryTileEntity(){
-        this(Industrialise.DeferredEvents.BATTERY_TILE.get());
+        this(Industrialise.TileEntities.BATTERY_TILE.get());
     }
 
     private final LazyOptional<IItemHandlerModifiable>[] caps = SidedInvWrapper.create(inventory, SidedInventory.Settings.GUI_ONLY);

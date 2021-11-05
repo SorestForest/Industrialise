@@ -1,6 +1,7 @@
 package ru.restudios.industrialise.containers;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
@@ -9,39 +10,35 @@ import net.minecraftforge.items.IItemHandler;
 import net.minecraftforge.items.SlotItemHandler;
 import net.minecraftforge.items.wrapper.InvWrapper;
 import ru.restudios.industrialise.Industrialise;
-import ru.restudios.industrialise.tileentities.BatteryTileEntity;
-import ru.restudios.industrialise.tileentities.DisenergizerTile;
+import ru.restudios.industrialise.tileentities.EnergyCollectorTileEntity;
 
-public class DisenergizerContainer extends Container {
+public class EnergyCollectorContainer extends Container {
 
+    private final EnergyCollectorTileEntity tile;
     private final IItemHandler entityInventory;
-    private final DisenergizerTile tileEntity;
 
-
-    public DisenergizerContainer(int windowID, PlayerEntity player, DisenergizerTile batteryTile) {
-        super(Industrialise.Containers.DISENERGIZER_CONTAINER.get(),windowID);
-        tileEntity = batteryTile;
-        entityInventory = new InvWrapper(player.inventory);
+    public EnergyCollectorContainer(int windowID, EnergyCollectorTileEntity tile, PlayerInventory playerInventory) {
+        super(Industrialise.Containers.ENERGY_COLLECTOR_CONTAINER.get(), windowID);
+        this.tile = tile;
+        entityInventory = new InvWrapper(playerInventory);
 
         layoutPlayerInventorySlots(8, 86);
-
-        if(tileEntity != null) {
-            tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(h -> {
-                addSlot(new Slots.ItemSlot(tileEntity.inventory,0,80,6,64,
-                        Industrialise.Blocks.ENERGY_BLOCK_ITEM.get(),Industrialise.Items.ENERGY_DUST.get()));
-                addSlot(new Slots.OutputSlot(tileEntity.inventory, 1,27,53,64));
-                addSlot(new Slots.BatterySlot(tileEntity.inventory,2,134,53));
+        if (tile != null){
+            tile.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).ifPresent(handler -> {
+                addSlot(new Slots.ItemSlot(tile.inventory,0,42,35,1,Industrialise.Items.COIL.get()));
+                addSlot(new Slots.ItemSlot(tile.inventory,1,60,35,1,Industrialise.Items.COIL.get()));
+                addSlot(new Slots.ItemSlot(tile.inventory,2,78,35,1,Industrialise.Items.COIL.get()));
+                addSlot(new Slots.ItemSlot(tile.inventory,3,96,35,1,Industrialise.Items.COIL.get()));
+                addSlot(new Slots.ItemSlot(tile.inventory,4,114,35,1,Industrialise.Items.COIL.get()));
             });
         }
     }
 
-
     @Override
     public boolean stillValid(PlayerEntity p_75145_1_) {
-        return ContainerUtils.stillValid(p_75145_1_,tileEntity,tileEntity.getBlockState().getBlock());
+        return ContainerUtils.stillValid(p_75145_1_,tile,tile.getBlockState().getBlock());
     }
 
-    @SuppressWarnings("all")
     private int addSlotRange(IItemHandler handler, int index, int x, int y, int amount, int dx) {
         for (int i = 0; i < amount; i++) {
             addSlot(new SlotItemHandler(handler, index, x, y));
@@ -58,6 +55,7 @@ public class DisenergizerContainer extends Container {
             index = addSlotRange(handler, index, x, y, horAmount, dx);
             y += dy;
         }
+
         return index;
     }
 
@@ -85,7 +83,7 @@ public class DisenergizerContainer extends Container {
     private static final int TE_INVENTORY_FIRST_SLOT_INDEX = VANILLA_FIRST_SLOT_INDEX + VANILLA_SLOT_COUNT;
 
     // THIS YOU HAVE TO DEFINE!
-    private static final int TE_INVENTORY_SLOT_COUNT = BatteryTileEntity.SLOTS;  // must match TileEntityInventoryBasic.NUMBER_OF_SLOTS
+    private static final int TE_INVENTORY_SLOT_COUNT = 5;  // must match TileEntityInventoryBasic.NUMBER_OF_SLOTS
 
     @Override
     public ItemStack quickMoveStack(PlayerEntity playerIn, int index) {
@@ -120,7 +118,5 @@ public class DisenergizerContainer extends Container {
         sourceSlot.onTake(playerIn, sourceStack);
         return copyOfSourceStack;
     }
-
-
 
 }

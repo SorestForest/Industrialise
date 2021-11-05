@@ -29,14 +29,14 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import ru.restudios.industrialise.block.BatteryBlock;
 import ru.restudios.industrialise.block.ComputerBlock;
 import ru.restudios.industrialise.block.DisenergizerBlock;
 import ru.restudios.industrialise.block.ThunderChargerBlock;
+import ru.restudios.industrialise.block.multiblock_hardcores.EnergyCollectorBlock;
 import ru.restudios.industrialise.containers.BatteryContainer;
 import ru.restudios.industrialise.containers.DisenergizerContainer;
+import ru.restudios.industrialise.containers.EnergyCollectorContainer;
 import ru.restudios.industrialise.containers.ThunderChargerContainer;
 import ru.restudios.industrialise.items.other.BatteryItem;
 import ru.restudios.industrialise.other.DebugTool;
@@ -44,11 +44,9 @@ import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.RegistryHelper;
 import ru.restudios.industrialise.screen.BatteryScreen;
 import ru.restudios.industrialise.screen.DisenergizerScreen;
+import ru.restudios.industrialise.screen.EnergyCollectorScreen;
 import ru.restudios.industrialise.screen.ThunderChargerScreen;
-import ru.restudios.industrialise.tileentities.BatteryTileEntity;
-import ru.restudios.industrialise.tileentities.ComputerTileEntity;
-import ru.restudios.industrialise.tileentities.DisenergizerTile;
-import ru.restudios.industrialise.tileentities.ThunderChargerTile;
+import ru.restudios.industrialise.tileentities.*;
 
 import java.util.Random;
 
@@ -57,15 +55,13 @@ import java.util.Random;
 public class Industrialise {
 
     // Directly reference a log4j logger.
-    private static final Logger LOGGER = LogManager.getLogger();
-
     public static final String MODID = "industrialise";
 
 
     public static final ItemGroup GROUP = new ItemGroup("Industrialise") {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(DeferredEvents.INFINITY_CRYSTAL.get());
+            return new ItemStack(Items.INFINITY_CRYSTAL.get());
         }
     };
 
@@ -76,10 +72,10 @@ public class Industrialise {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
         // Register ourselves for server and other game events we are interested in
-        DeferredEvents.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        DeferredEvents.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
-        DeferredEvents.TILE_ENTITY.register(FMLJavaModLoadingContext.get().getModEventBus());
-        DeferredEvents.CONTAINERS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        Blocks.BLOCKS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        Items.ITEMS.register(FMLJavaModLoadingContext.get().getModEventBus());
+        TileEntities.TILE_ENTITY.register(FMLJavaModLoadingContext.get().getModEventBus());
+        Containers.CONTAINERS.register(FMLJavaModLoadingContext.get().getModEventBus());
 
         MinecraftForge.EVENT_BUS.register(this);
     }
@@ -87,26 +83,25 @@ public class Industrialise {
     private void setup(final FMLCommonSetupEvent event) {
         // some preinit code
 
+
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
         // Registering screens
         event.enqueueWork(() -> {
-            ScreenManager.register(DeferredEvents.THUNDER_CHARGER_CONTAINER.get(),ThunderChargerScreen::new);
-            ScreenManager.register(DeferredEvents.BATTERY_CONTAINER.get(), BatteryScreen::new);
-            ScreenManager.register(DeferredEvents.DISENERGIZER_CONTAINER.get(), DisenergizerScreen::new);
+            ScreenManager.register(Containers.THUNDER_CHARGER_CONTAINER.get(),ThunderChargerScreen::new);
+            ScreenManager.register(Containers.BATTERY_CONTAINER.get(), BatteryScreen::new);
+            ScreenManager.register(Containers.DISENERGIZER_CONTAINER.get(), DisenergizerScreen::new);
+            ScreenManager.register(Containers.ENERGY_COLLECTOR_CONTAINER.get(), EnergyCollectorScreen::new);
         });
     }
 
 
 
     @SuppressWarnings("unused")
-    public static class DeferredEvents {
+    public static class Items {
 
         public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS,MODID);
-        public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS,MODID);
-        public static final DeferredRegister<TileEntityType<?>> TILE_ENTITY = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES,MODID);
-        public static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS,MODID);
 
         // Ingredients
         public static final RegistryObject<Item> BATTERY_FIRST = ITEMS.register("battery_first",()-> new BatteryItem(10000));
@@ -141,6 +136,7 @@ public class Industrialise {
                 return true;
             }
         });
+        public static final RegistryObject<Item> COIL = ITEMS.register("coil",RegistryHelper::getDefaultItem);
 
         public static final RegistryObject<Item> DIAMOND_DUST = ITEMS.register("diamond_dust", RegistryHelper::getDefaultItem);
         public static final RegistryObject<Item> OBSIDIAN_DUST = ITEMS.register("obsidian_dust", RegistryHelper::getDefaultItem);
@@ -159,61 +155,6 @@ public class Industrialise {
 
         // Tools + weapons
         public static final RegistryObject<Item> DEBUG_TOOL = ITEMS.register("debug_tool", DebugTool::new);
-
-        // Blocks
-        public static final RegistryObject<Block> THUNDER_CHARGER = BLOCKS.register("thunder_charger", ThunderChargerBlock::new);
-        public static final RegistryObject<Item> THUNDER_CHARGER_ITEM = ITEMS.register("thunder_charger",
-                () -> new BlockItem(THUNDER_CHARGER.get(), RegistryHelper.getUncommonItemProperties()));
-        public static final RegistryObject<Block> COMPUTER_BLOCK = BLOCKS.register("computer", ComputerBlock::new);
-        public static final RegistryObject<Item> COMPUTER_ITEM = ITEMS.register("computer",
-                ()-> new BlockItem(COMPUTER_BLOCK.get(), RegistryHelper.getUncommonItemProperties()));
-        public static final RegistryObject<Block> ENERGY_BLOCK = BLOCKS.register("energy_block",
-                () -> new Block(AbstractBlock.Properties.of(Material.STONE).sound(SoundType.STONE).strength(4)));
-        public static final RegistryObject<Item> ENERGY_BLOCK_ITEM = ITEMS.register("energy_block",
-                ()-> new BlockItem(ENERGY_BLOCK.get(),RegistryHelper.getUncommonItemProperties()));
-        public static final RegistryObject<Block> NETHERITE_CASE = BLOCKS.register("netherite_case",RegistryHelper::getMetalBlock);
-        public static final RegistryObject<Item> NETHERITE_CASE_ITEM = ITEMS.register("netherite_case",() -> RegistryHelper.defaultBlockItem(NETHERITE_CASE.get()));
-        public static final RegistryObject<Block> DISENERGIZER_BLOCK = BLOCKS.register("disenergizer", DisenergizerBlock::new);
-        public static final RegistryObject<Item> DISENERGIZER_ITEM = ITEMS.register("disenergizer",
-                ()->RegistryHelper.defaultBlockItem(DISENERGIZER_BLOCK.get()));
-        public static final RegistryObject<Block> BATTERY_BLOCK = BLOCKS.register("battery_block", BatteryBlock::new);
-        public static final RegistryObject<Item> BATTERY_ITEM = ITEMS.register("battery_block",()->RegistryHelper.defaultBlockItem(BATTERY_BLOCK.get()));
-
-        // Tile entities
-        public static final RegistryObject<TileEntityType<ThunderChargerTile>> THUNDER_CHARGER_TILE = TILE_ENTITY.register("thunder_charger_tile",
-                ()->TileEntityType.Builder.of(ThunderChargerTile::new,THUNDER_CHARGER.get()).build(null));
-        public static final RegistryObject<TileEntityType<ComputerTileEntity>> COMPUTER_TILE = TILE_ENTITY.register("computer_tile",
-                ()->TileEntityType.Builder.of(ComputerTileEntity::new,COMPUTER_BLOCK.get()).build(null));
-        public static final RegistryObject<TileEntityType<DisenergizerTile>> DISENERGIZER_TILE = TILE_ENTITY.register("disenergizer_tile",
-                ()->TileEntityType.Builder.of(DisenergizerTile::new,DISENERGIZER_BLOCK.get()).build(null));
-        public static final RegistryObject<TileEntityType<BatteryTileEntity>> BATTERY_TILE = TILE_ENTITY.register("battery_tile",
-                ()->TileEntityType.Builder.of(BatteryTileEntity::new,BATTERY_BLOCK.get()).build(null));
-
-        // Containers
-        public static final RegistryObject<ContainerType<ThunderChargerContainer>> THUNDER_CHARGER_CONTAINER = CONTAINERS.register("thunder_charger_container",
-                ()-> IForgeContainerType.create((windowId, inv, data) -> {
-                    BlockPos pos = data.readBlockPos();
-                    PlayerEntity entity = inv.player;
-                    TileEntity tileEntity = entity.level.getBlockEntity(pos);
-
-                    return new ThunderChargerContainer(windowId,tileEntity,entity);
-                }));
-        public static final RegistryObject<ContainerType<BatteryContainer>> BATTERY_CONTAINER = CONTAINERS.register("battery_container",
-                ()-> IForgeContainerType.create((windowId, inv, data) -> {
-                    BlockPos pos = data.readBlockPos();
-                    PlayerEntity player = inv.player;
-                    TileEntity tile = player.level.getBlockEntity(pos);
-                    int energy = data.readInt();
-                    return new BatteryContainer(windowId,player, REUtils.castOrNull(BatteryTileEntity.class,tile),energy);
-                }));
-        public static final RegistryObject<ContainerType<DisenergizerContainer>> DISENERGIZER_CONTAINER = CONTAINERS.register("disenergizer_container",
-                ()-> IForgeContainerType.create((windowId, inv, data) -> {
-                    BlockPos pos = data.readBlockPos();
-                    PlayerEntity entity = inv.player;
-                    TileEntity tileEntity = entity.level.getBlockEntity(pos);
-
-                    return new DisenergizerContainer(windowId,entity,REUtils.castOrNull(DisenergizerTile.class,tileEntity));
-                }));
 
         public static Item glowing(Item.Properties properties){
             return new Item(properties){
@@ -253,6 +194,94 @@ public class Industrialise {
         }
     }
 
+    @SuppressWarnings("unused")
+    public static class Blocks {
+        
+        public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS,MODID);
+        
+        // Blocks
+        public static final RegistryObject<Block> THUNDER_CHARGER = BLOCKS.register("thunder_charger", ThunderChargerBlock::new);
+        public static final RegistryObject<Item> THUNDER_CHARGER_ITEM = Items.ITEMS.register("thunder_charger",
+                () -> new BlockItem(THUNDER_CHARGER.get(), RegistryHelper.getUncommonItemProperties()));
+        public static final RegistryObject<Block> COMPUTER_BLOCK = BLOCKS.register("computer", ComputerBlock::new);
+        public static final RegistryObject<Item> COMPUTER_ITEM = Items.ITEMS.register("computer",
+                ()-> new BlockItem(COMPUTER_BLOCK.get(), RegistryHelper.getUncommonItemProperties()));
+        public static final RegistryObject<Block> ENERGY_BLOCK = BLOCKS.register("energy_block",
+                () -> new Block(AbstractBlock.Properties.of(Material.STONE).sound(SoundType.STONE).strength(4)));
+        public static final RegistryObject<Item> ENERGY_BLOCK_ITEM = Items.ITEMS.register("energy_block",
+                ()-> new BlockItem(ENERGY_BLOCK.get(),RegistryHelper.getUncommonItemProperties()));
+        public static final RegistryObject<Block> NETHERITE_CASE = BLOCKS.register("netherite_case",RegistryHelper::getMetalBlock);
+        public static final RegistryObject<Item> NETHERITE_CASE_ITEM = Items.ITEMS.register("netherite_case",() -> RegistryHelper.defaultBlockItem(NETHERITE_CASE.get()));
+        public static final RegistryObject<Block> DISENERGIZER_BLOCK = BLOCKS.register("disenergizer", DisenergizerBlock::new);
+        public static final RegistryObject<Item> DISENERGIZER_ITEM = Items.ITEMS.register("disenergizer",
+                ()->RegistryHelper.defaultBlockItem(DISENERGIZER_BLOCK.get()));
+        public static final RegistryObject<Block> BATTERY_BLOCK = BLOCKS.register("battery_block", BatteryBlock::new);
+        public static final RegistryObject<Item> BATTERY_ITEM = Items.ITEMS.register("battery_block",()->RegistryHelper.defaultBlockItem(BATTERY_BLOCK.get()));
+        public static final RegistryObject<Block> ENERGY_COLLECTOR = BLOCKS.register("energy_collector", EnergyCollectorBlock::new);
+        public static final RegistryObject<Item> ENERGY_COLLECTOR_ITEM = Items.ITEMS.register("energy_collector",
+                ()-> RegistryHelper.defaultBlockItem(ENERGY_COLLECTOR.get()));
+    }
+
+    @SuppressWarnings({"unused", "ConstantConditions"})
+    public static class TileEntities {
+
+        public static final DeferredRegister<TileEntityType<?>> TILE_ENTITY = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES,MODID);
+
+
+        // Tile entities
+        public static final RegistryObject<TileEntityType<ThunderChargerTile>> THUNDER_CHARGER_TILE = TILE_ENTITY.register("thunder_charger_tile",
+                ()->TileEntityType.Builder.of(ThunderChargerTile::new,Blocks.THUNDER_CHARGER.get()).build(null));
+        public static final RegistryObject<TileEntityType<ComputerTileEntity>> COMPUTER_TILE = TILE_ENTITY.register("computer_tile",
+                ()->TileEntityType.Builder.of(ComputerTileEntity::new,Blocks.COMPUTER_BLOCK.get()).build(null));
+        public static final RegistryObject<TileEntityType<DisenergizerTile>> DISENERGIZER_TILE = TILE_ENTITY.register("disenergizer_tile",
+                ()->TileEntityType.Builder.of(DisenergizerTile::new,Blocks.DISENERGIZER_BLOCK.get()).build(null));
+        public static final RegistryObject<TileEntityType<BatteryTileEntity>> BATTERY_TILE = TILE_ENTITY.register("battery_tile",
+                ()->TileEntityType.Builder.of(BatteryTileEntity::new,Blocks.BATTERY_BLOCK.get()).build(null));
+        public static final RegistryObject<TileEntityType<EnergyCollectorTileEntity>> ENERGY_COLLECTOR_TILE = TILE_ENTITY.register("energy_collector_tile",
+                ()->TileEntityType.Builder.of(EnergyCollectorTileEntity::new,Blocks.ENERGY_COLLECTOR.get()).build(null));
+    }
+
+    @SuppressWarnings("unused")
+    public static class Containers {
+
+        public static final DeferredRegister<ContainerType<?>> CONTAINERS = DeferredRegister.create(ForgeRegistries.CONTAINERS,MODID);
+
+        // Containers
+        public static final RegistryObject<ContainerType<ThunderChargerContainer>> THUNDER_CHARGER_CONTAINER = CONTAINERS.register("thunder_charger_container",
+                ()-> IForgeContainerType.create((windowId, inv, data) -> {
+                    BlockPos pos = data.readBlockPos();
+                    PlayerEntity entity = inv.player;
+                    TileEntity tileEntity = entity.level.getBlockEntity(pos);
+
+                    return new ThunderChargerContainer(windowId,tileEntity,entity);
+                }));
+        public static final RegistryObject<ContainerType<BatteryContainer>> BATTERY_CONTAINER = CONTAINERS.register("battery_container",
+                ()-> IForgeContainerType.create((windowId, inv, data) -> {
+                    BlockPos pos = data.readBlockPos();
+                    PlayerEntity player = inv.player;
+                    TileEntity tile = player.level.getBlockEntity(pos);
+                    int energy = data.readInt();
+                    return new BatteryContainer(windowId,player, REUtils.castOrNull(BatteryTileEntity.class,tile),energy);
+                }));
+        public static final RegistryObject<ContainerType<DisenergizerContainer>> DISENERGIZER_CONTAINER = CONTAINERS.register("disenergizer_container",
+                ()-> IForgeContainerType.create((windowId, inv, data) -> {
+                    BlockPos pos = data.readBlockPos();
+                    PlayerEntity entity = inv.player;
+                    TileEntity tileEntity = entity.level.getBlockEntity(pos);
+
+                    return new DisenergizerContainer(windowId,entity,REUtils.castOrNull(DisenergizerTile.class,tileEntity));
+                }));
+        public static final RegistryObject<ContainerType<EnergyCollectorContainer>> ENERGY_COLLECTOR_CONTAINER = CONTAINERS.register("energy_collector_container",
+                ()-> IForgeContainerType.create(((windowId, inv, data) -> {
+                    BlockPos pos = data.readBlockPos();
+                    EnergyCollectorTileEntity tile = REUtils.castOrNull(EnergyCollectorTileEntity.class,inv.player.level.getBlockEntity(pos));
+                    return new EnergyCollectorContainer(windowId,tile,inv);
+                })));
+
+
+    }
+
+    
     public static ResourceLocation resource(String path){
         return new ResourceLocation(Industrialise.MODID,path);
     }
@@ -272,27 +301,20 @@ public class Industrialise {
     }
 
 
+    
     public enum ResourceType {
-        SCREEN("textures/gui/",false),
-        BLOCK_NAME("block.industrialise.",true),
-        ITEM("item.industrialise.",true),
-        CONTAINER("screen.industrialise.",true);
+        SCREEN("textures/gui/"),
+        CONTAINER("screen.industrialise.");
 
         private final String name;
-        private final boolean translation;
 
-        ResourceType(String name,boolean t){
+        ResourceType(String name){
             this.name = name;
-            translation = t;
         }
 
         @Override
         public String toString() {
             return name;
-        }
-
-        public boolean translation() {
-            return translation;
         }
     }
 }
