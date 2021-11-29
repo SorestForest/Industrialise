@@ -22,6 +22,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.extensions.IForgeContainerType;
+import net.minecraftforge.energy.CapabilityEnergy;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -42,6 +43,7 @@ import ru.restudios.industrialise.items.other.BatteryItem;
 import ru.restudios.industrialise.other.DebugTool;
 import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.RegistryHelper;
+import ru.restudios.industrialise.other.capabilities.ForestEnergyCapability;
 import ru.restudios.industrialise.screen.BatteryScreen;
 import ru.restudios.industrialise.screen.DisenergizerScreen;
 import ru.restudios.industrialise.screen.EnergyCollectorScreen;
@@ -66,9 +68,7 @@ public class Industrialise {
     };
 
     public Industrialise() {
-
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::setup);
-
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::doClientStuff);
 
         // Register ourselves for server and other game events we are interested in
@@ -82,8 +82,7 @@ public class Industrialise {
 
     private void setup(final FMLCommonSetupEvent event) {
         // some preinit code
-
-
+        ForestEnergyCapability.register();
     }
 
     private void doClientStuff(final FMLClientSetupEvent event) {
@@ -226,7 +225,6 @@ public class Industrialise {
     public static class TileEntities {
 
         public static final DeferredRegister<TileEntityType<?>> TILE_ENTITY = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES,MODID);
-
 
         // Tile entities
         public static final RegistryObject<TileEntityType<ThunderChargerTile>> THUNDER_CHARGER_TILE = TILE_ENTITY.register("thunder_charger_tile",

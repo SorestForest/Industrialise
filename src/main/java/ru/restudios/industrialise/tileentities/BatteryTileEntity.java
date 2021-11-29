@@ -9,17 +9,14 @@ import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.CapabilityEnergy;
-import net.minecraftforge.energy.EnergyStorage;
-import net.minecraftforge.energy.IEnergyStorage;
 import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandlerModifiable;
-import net.minecraftforge.items.wrapper.SidedInvWrapper;
 import ru.restudios.industrialise.Industrialise;
 import ru.restudios.industrialise.items.other.BatteryItem;
 import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.SidedInventory;
 import ru.restudios.industrialise.other.Tags;
+import ru.restudios.industrialise.other.capabilities.ForestEnergyCapability;
+import ru.restudios.industrialise.other.capabilities.ForestEnergyStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -27,7 +24,7 @@ import javax.annotation.Nullable;
 public class BatteryTileEntity extends TileEntity implements ITickableTileEntity {
 
     public final SidedInventory inventory = createSided();
-    private EnergyStorage storage = createStorage(0);
+    private ForestEnergyStorage storage = createStorage(0);
 
     public static final int START_CAPACITY = 300000;
     public static final int SLOTS = 1;
@@ -43,8 +40,8 @@ public class BatteryTileEntity extends TileEntity implements ITickableTileEntity
         };
     }
 
-    private EnergyStorage createStorage(int energy) {
-        return new EnergyStorage(START_CAPACITY,4000,4000,energy);
+    private ForestEnergyStorage createStorage(int energy) {
+        return new ForestEnergyStorage(START_CAPACITY,4000,4000,energy);
     }
 
     public BatteryTileEntity(TileEntityType<?> type) {
@@ -55,18 +52,18 @@ public class BatteryTileEntity extends TileEntity implements ITickableTileEntity
         this(Industrialise.TileEntities.BATTERY_TILE.get());
     }
 
-    private final LazyOptional<IItemHandlerModifiable>[] caps = SidedInvWrapper.create(inventory, SidedInventory.Settings.GUI_ONLY);
-    private final LazyOptional<IEnergyStorage> energyStorage = LazyOptional.of(()->storage);
+    private final LazyOptional<ForestEnergyStorage> energyStorage = LazyOptional.of(()->storage);
+
     @Nonnull
     @Override
     public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
         if (side == null){
             if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY){
-                return caps[0].cast();
+                return inventory.asHandler(null).cast();
             }
-            if (cap == CapabilityEnergy.ENERGY){
-                return energyStorage.cast();
-            }
+        }
+        if (cap == ForestEnergyCapability.FOREST_ENERGY){
+            return energyStorage.cast();
         }
         return super.getCapability(cap, side);
     }

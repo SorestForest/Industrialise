@@ -33,9 +33,7 @@ public class DebugTool extends Item {
                 BatteryTileEntity tile = REUtils.castOrNull(BatteryTileEntity.class,world.getBlockEntity(entity.blockPosition().below()));
                 assert tile != null;
                 tile.getCapability(CapabilityEnergy.ENERGY,null).ifPresent(iEnergyStorage -> {
-                    for (int i = 0; i <10 ; i++) {
-                        iEnergyStorage.receiveEnergy(90000,false);
-                    }
+                    iEnergyStorage.receiveEnergy(90000,false);
                     if (world.isClientSide())
                         entity.sendMessage(Industrialise.string("Energy filled: "+iEnergyStorage.getEnergyStored()),UUID.randomUUID());
                 });
