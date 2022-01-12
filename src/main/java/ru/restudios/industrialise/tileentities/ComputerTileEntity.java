@@ -20,13 +20,11 @@ import ru.restudios.industrialise.other.multiblock.IMultiBlockFactoryProvider;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class ComputerTileEntity extends TileEntity implements ITickableTileEntity {
 
-    private IMultiBlock multiBlock;
+
 
     public ComputerTileEntity(TileEntityType<?> p_i48289_1_) {
         super(p_i48289_1_);
@@ -36,79 +34,66 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
         this(Industrialise.TileEntities.COMPUTER_TILE.get());
     }
 
-    private Block lastBlock;
-    private final HashMap<BlockPos,Block> connected = Maps.newHashMap();
+
+    private Block controller;
+    private IMultiBlock multiBlock;
+    private final HashMap<Direction,Block> placedNear = Maps.newHashMap();
 
     @Override
     public void tick() {
         assert level != null;
-        TileEntity serverTile;
+        //TileEntity serverTile;
 
         if (!level.isClientSide){
-            if (lastBlock == null || !lastBlock.is(level.getBlockState(worldPosition.above()).getBlock())){
-                Block block = level.getBlockState(worldPosition.above()).getBlock();
-                if (block.is(Tags.BlockTags.COMPUTER_ADDITION)){
+            // Check if controller block has changed
+            if (this.controller == null || !this.controller.is(level.getBlockState(worldPosition.above()).getBlock())){
+                Block above = level.getBlockState(worldPosition.above()).getBlock(); // it changed, getting new block
+                if (above.is(Blocks.AIR)){ // oh, its air, skip it
+                    this.controller = above; // but set as controller to avoid empty checks
+                    return;
+                }
+                if (above.is(Tags.BlockTags.COMPUTER_ADDITION)){ // oh, its controller block, parse it
                     this.multiBlock = parseBlock(level.getBlockState(worldPosition.above()),level.getBlockEntity(worldPosition.above()));
-                    lastBlock = block;
                 }
-
-                else {
-                    if (multiBlock != null){
-                        multiBlock.onStructureDestroyed();
-                    }
-                    multiBlock = null; lastBlock = null; }
+                this.controller = above; // and set any block to avoid empty checks
+                return;  // We can't do anything new on tick
             }
-            if (multiBlock != null){
-                if (multiBlock.isBuild()){
-                    multiBlock.tick();
+            if (multiBlock == null){ // make sure that we have controller
+                return;
+            }
+            if (multiBlock.isBuild()){ // oh, its build nice, tick it
+                multiBlock.tick();
+            }
+            for (Direction d : SidedInventory.Settings.ALL_NON_NULL){ // walk for all directions, except UP, it controlled by other lines
+                if (d == Direction.UP){
+                    continue;
                 }
-                for (Direction d : SidedInventory.Settings.ALL){
-                    if (d == Direction.UP) { continue; }
-                    if (d == null) { continue; }
-                    BlockPos relative = worldPosition.relative(d);
-
-                    boolean stop = false;
-                    for (BlockPos poses : connected.keySet()){
-                        if (poses.equals(relative)){
-                            stop = true;
-                            break;
-                        }
-                    }
-                    if (stop){
-                        continue;
-                    }
-
-                    Block blockIn = level.getBlockState(relative).getBlock();
-                    if (blockIn == Blocks.AIR) { continue; }
-                    if (multiBlock.canConnect(blockIn)){
-                        serverTile = level.getBlockEntity(relative);
-                        multiBlock.connectPart(level.getBlockState(relative),serverTile);
-                        connected.remove(relative);
-                        connected.put(relative, blockIn);
-                    }
+                BlockPos relativePosition = worldPosition.relative(d);
+                BlockState relative = level.getBlockState(relativePosition);
+                Block type = relative.getBlock();
+                Block cache = placedNear.getOrDefault(d,Blocks.AIR);
+                if (type.is(cache)){ // If block in cache == placed block, no actions required
+                    continue;
                 }
-                ArrayList<BlockPos> blocksToRemove = new ArrayList<>();
-                for (Map.Entry<BlockPos, Block> entry : connected.entrySet()){
-                    BlockState currentState = level.getBlockState(entry.getKey());
-                    if (!currentState.getBlock().is(entry.getValue())){
-                        multiBlock.disconnectPart(entry.getValue()); blocksToRemove.add(entry.getKey());
-                    }
+                if (multiBlock.canConnect(type)){ // if actions required, check that new block can be connected to multiblock
+                    multiBlock.connectPart(relative,level.getBlockEntity(relativePosition),relativePosition); // connecting it
                 }
-                for (BlockPos block : blocksToRemove) {
-                    connected.remove(block);
+                else {
+                    multiBlock.disconnectPart(cache,relativePosition); // otherwise, disconnect it
                 }
+                placedNear.put(d,type); // and put block in cache to avoid empty checks
             }
         }
+
+
     }
 
-
-
-    private IMultiBlock parseBlock(BlockState state,TileEntity at){
+    private IMultiBlock parseBlock(BlockState state,TileEntity at){ // simple parse blockstate to multiblock
         Block block = state.getBlock();
-        if (block instanceof IMultiBlockFactoryProvider){
+        if (block instanceof IMultiBlockFactoryProvider){ // validate for some reasons
             IMultiBlockFactoryProvider<?> provider = REUtils.castOrNull(IMultiBlockFactoryProvider.class,block);
             if (provider == null) { throw new RuntimeException("Unknown exception"); }
-            return provider.provide(at.getLevel()).create(state,at,this);
+            return provider.provide(at.getLevel()).create(state,at,this); // just cast block to provider, get factory and use it!
         }
         return null; // It can't be
     }
@@ -126,6 +111,7 @@ public class ComputerTileEntity extends TileEntity implements ITickableTileEntit
         return multiBlock.getTileEntity().getCapability(cap,side);
     }
 
+    @SuppressWarnings("unused")
     public boolean isStructureBuild(){
         if (multiBlock == null){ return false; }
         return multiBlock.isBuild();

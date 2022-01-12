@@ -3,12 +3,15 @@ package ru.restudios.industrialise.other;
 import com.google.common.collect.Lists;
 import net.minecraft.item.ItemStack;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 
 public class REUtils {
 
     private REUtils() {}
 
+    @Nullable
     public static <T> T castOrNull(Class<T> clazz, Object cast){
         if (clazz == null || cast == null){ return null; }
         if (clazz.isAssignableFrom(cast.getClass())){
@@ -23,6 +26,7 @@ public class REUtils {
         return value;
     }
 
+    @Nonnull
     public static int[] getFrom(int from,int to){
         if (from > to) { throw new IllegalArgumentException("From is bigger than to. From: "+from+", To: "+to); }
         int[] array = new int[to-from];
@@ -33,7 +37,8 @@ public class REUtils {
         return reverse_array(array);
     }
 
-    public static int[] reverse_array(int[] a)
+    @Nonnull
+    public static int[] reverse_array(@Nonnull int[] a)
     {
         int n = a.length;
         int[] dest_array = new int[n];
@@ -46,7 +51,7 @@ public class REUtils {
         return dest_array;
     }
 
-
+    @Nonnull
     public static <T> T[] collapse(T[] a, T[] b){
         ArrayList<T> output = new ArrayList<>();
         output.addAll(Lists.asList(null,a));
@@ -55,6 +60,7 @@ public class REUtils {
         output.remove(a.length);
         return output.toArray(a);
     }
+
 
     public static boolean consideredTheSameItem(ItemStack p_195929_0_, ItemStack p_195929_1_) {
         if (p_195929_0_.getItem() != p_195929_1_.getItem()){ return false;}

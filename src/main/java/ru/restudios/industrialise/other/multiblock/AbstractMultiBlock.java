@@ -4,6 +4,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import ru.restudios.industrialise.other.REUtils;
 
@@ -13,7 +14,7 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
 
     private final HashMap<Block,Integer> blockCountsNeeded = Maps.newHashMap();
     private final HashMap<Block,Integer> blockCountsPlaced = Maps.newHashMap();
-    private final HashMap<Block,TileEntity> placed = new HashMap<>();
+    private final HashMap<BlockPos,TileEntity> placed = new HashMap<>();
 
     protected BlockState state;
     protected World world;
@@ -31,18 +32,17 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
                 blockCountsNeeded.put(part,1);
             }
         }
-        System.out.println(blockCountsNeeded+" are needed to build structure ");
     }
 
     @Override
-    public void connectPart(BlockState part, TileEntity server) {
+    public void connectPart(BlockState part, TileEntity server,BlockPos relativePosition) {
         if (canConnect(part.getBlock())){
             int placed = blockCountsPlaced.getOrDefault(part.getBlock(),0);
             placed += 1;
             blockCountsPlaced.remove(part.getBlock());
             blockCountsPlaced.put(part.getBlock(),placed);
             onPartConnected(part,server);
-            this.placed.put(part.getBlock(),server);
+            this.placed.put(relativePosition,server);
             if (isBuild()){
                 onStructureBuilt();
             }
@@ -50,15 +50,18 @@ public abstract class AbstractMultiBlock implements IMultiBlock {
     }
 
     @Override
-    public void disconnectPart(Block part) {
+    public void disconnectPart(Block part,BlockPos at) {
         if (blockCountsPlaced.containsKey(part)){
+            boolean isBuild = isBuild();
             int i = blockCountsPlaced.get(part);
             i -= 1;
             i = REUtils.keepInRange(i,0,Integer.MAX_VALUE);
             blockCountsPlaced.remove(part);
             blockCountsPlaced.put(part,i);
-            placed.remove(part);
-            onStructureDestroyed();
+            placed.remove(at);
+            if (isBuild){
+                onStructureDestroyed();
+            }
         }
     }
 

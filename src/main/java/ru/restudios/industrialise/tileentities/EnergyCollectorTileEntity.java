@@ -49,7 +49,7 @@ public class EnergyCollectorTileEntity extends TileEntity implements IMultiBlock
 
     @Override
     public boolean isReady() {
-        return !inventory.isEmpty();
+        return inventory.isFilled();
     }
 
     @Override

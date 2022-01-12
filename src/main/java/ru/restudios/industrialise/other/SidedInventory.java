@@ -5,6 +5,7 @@ import net.minecraft.inventory.ISidedInventory;
 import net.minecraft.inventory.ItemStackHelper;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
@@ -234,6 +235,18 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
         return caps[index];
     }
 
+    public boolean isFilled() {
+        for (ItemStack item : getItems()) {
+            if (item.getItem() == Items.AIR){
+                return false;
+            }
+            if (item.getCount() == 0){
+                return false;
+            }
+        }
+        return true;
+    }
+
     public static class Settings {
 
         private final Direction[] sides;
@@ -260,6 +273,7 @@ public class SidedInventory implements ISidedInventory, INBTSerializable<Compoun
         public static final Direction[] MAIN_INPUT = new Direction[]{Direction.UP};
         public static final Direction[] MAIN_OUTPUT = new Direction[]{Direction.DOWN};
         public static final Direction[] ALL = REUtils.collapse(REUtils.collapse(HORIZONTAL,VERTICAL),GUI_ONLY);
+        public static final Direction[] ALL_NON_NULL = REUtils.collapse(HORIZONTAL,VERTICAL);
 
         private boolean canExtract(){
             return canExtract;

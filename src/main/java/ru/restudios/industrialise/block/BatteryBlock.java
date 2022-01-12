@@ -1,5 +1,6 @@
 package ru.restudios.industrialise.block;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
@@ -23,6 +24,7 @@ import ru.restudios.industrialise.other.RegistryHelper;
 import ru.restudios.industrialise.tileentities.BatteryTileEntity;
 
 import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
 
 public class BatteryBlock extends Block {
     public BatteryBlock() {
@@ -41,6 +43,8 @@ public class BatteryBlock extends Block {
     }
 
     @Override
+    @ParametersAreNonnullByDefault
+    @MethodsReturnNonnullByDefault
     public ActionResultType use(BlockState state, World worldIn, BlockPos pos,
                                 PlayerEntity player, Hand handIn, BlockRayTraceResult hit) {
         if(!worldIn.isClientSide) {
@@ -55,7 +59,7 @@ public class BatteryBlock extends Block {
                             return Industrialise.localise(Industrialise.ResourceType.CONTAINER,"battery_block");
                         }
 
-                        @Nullable
+
                         @Override
                         public Container createMenu(int p_createMenu_1_, PlayerInventory p_createMenu_2_, PlayerEntity p_createMenu_3_) {
                             assert tile != null;

@@ -1,30 +1,27 @@
 package ru.restudios.industrialise.tileentities;
 
+import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.tileentity.ITickableTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.Direction;
-import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
+import net.minecraftforge.energy.EnergyStorage;
 import ru.restudios.industrialise.Industrialise;
 import ru.restudios.industrialise.items.other.BatteryItem;
 import ru.restudios.industrialise.other.REUtils;
 import ru.restudios.industrialise.other.SidedInventory;
 import ru.restudios.industrialise.other.Tags;
-import ru.restudios.industrialise.other.capabilities.ForestEnergyCapability;
-import ru.restudios.industrialise.other.capabilities.ForestEnergyStorage;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import javax.annotation.ParametersAreNonnullByDefault;
+
 
 public class BatteryTileEntity extends TileEntity implements ITickableTileEntity {
 
     public final SidedInventory inventory = createSided();
-    private ForestEnergyStorage storage = createStorage(0);
+    private EnergyStorage storage = createStorage(0);
 
     public static final int START_CAPACITY = 300000;
     public static final int SLOTS = 1;
@@ -40,8 +37,8 @@ public class BatteryTileEntity extends TileEntity implements ITickableTileEntity
         };
     }
 
-    private ForestEnergyStorage createStorage(int energy) {
-        return new ForestEnergyStorage(START_CAPACITY,4000,4000,energy);
+    private EnergyStorage createStorage(int energy) {
+        return new EnergyStorage(START_CAPACITY,4000,4000,energy);
     }
 
     public BatteryTileEntity(TileEntityType<?> type) {
@@ -52,21 +49,11 @@ public class BatteryTileEntity extends TileEntity implements ITickableTileEntity
         this(Industrialise.TileEntities.BATTERY_TILE.get());
     }
 
-    private final LazyOptional<ForestEnergyStorage> energyStorage = LazyOptional.of(()->storage);
+    private final LazyOptional<EnergyStorage> energyStorage = LazyOptional.of(()->storage);
 
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(@Nonnull Capability<T> cap, @Nullable Direction side) {
-        if (side == null){
-            if (cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY){
-                return inventory.asHandler(null).cast();
-            }
-        }
-        if (cap == ForestEnergyCapability.FOREST_ENERGY){
-            return energyStorage.cast();
-        }
-        return super.getCapability(cap, side);
-    }
+
+
+
 
     @Override
     public void tick() {
@@ -85,12 +72,15 @@ public class BatteryTileEntity extends TileEntity implements ITickableTileEntity
     }
 
     @Override
+    @ParametersAreNonnullByDefault
     public void load(BlockState p_230337_1_, CompoundNBT p_230337_2_) {
         storage = createStorage(p_230337_2_.getInt("Energy"));
         super.load(p_230337_1_, p_230337_2_);
     }
 
+    @SuppressWarnings("NullableProblems")
     @Override
+    @MethodsReturnNonnullByDefault
     public CompoundNBT save(CompoundNBT p_189515_1_) {
         p_189515_1_.putInt("Energy",storage.getEnergyStored());
         return super.save(p_189515_1_);

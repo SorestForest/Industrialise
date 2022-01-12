@@ -21,30 +21,19 @@ public class ThunderChargerMultiBlock extends AbstractMultiBlock {
     }
 
     @Override
-    public ArrayList<Block> parts() {
-        return Lists.newArrayList(Industrialise.Blocks.ENERGY_COLLECTOR.get(),Industrialise.Blocks.ENERGY_COLLECTOR.get());
-    }
+    public ArrayList<Block> parts() { return Lists.newArrayList(Industrialise.Blocks.ENERGY_COLLECTOR.get(),Industrialise.Blocks.ENERGY_COLLECTOR.get()); }
 
     @Override
-    public void tick() {
-
-    }
+    public void tick() { tile.structureBuild(); }
 
     @Override
-    public void onStructureBuilt() {
-        tile.structureBuild();
-    }
+    public void onStructureBuilt() { tile.structureBuild(); }
 
     @Override
-    public void onStructureDestroyed() {
-        tile.structureDestroy();
-    }
+    public void onStructureDestroyed() { tile.structureDestroy(); }
 
     @Override
-    public void onPartConnected(BlockState part, TileEntity server) {
-
-    }
-
+    public void onPartConnected(BlockState part, TileEntity server) {}
 
     @Override
     public TileEntity getTileEntity() {
